@@ -1,7 +1,9 @@
 module TreatmentEffects
 
-export ExogenousParticipationModel,
-	   ate_estimator
+export
+# ExogenousParticipationModel
+	ExogenousParticipationModel,
+	ate_estimator
 
 include("modeltypes.jl")
 include("exogenous_participation.jl")

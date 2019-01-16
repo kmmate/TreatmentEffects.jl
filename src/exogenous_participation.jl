@@ -31,7 +31,9 @@ ate_hat = ate_estimator(epm)
 ```
 """
 function ate_estimator(m::ExogenousParticipationModel)
-	mean_treated = sum(m.y[m.d==1]) / sum(m.d)
-	mean_control = sum(m.y[m.d==0]) / (length(m.y) - sum(m.d))
+	n_treated = sum(m.d)
+	n_control = length(y) - n_treated
+	mean_treated = sum(m.y[m.d .== 1]) / n_treated
+	mean_control = sum(m.y[m.d .== 0]) / n_control
 	return mean_treated - mean_control
 end

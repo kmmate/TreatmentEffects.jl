@@ -48,7 +48,9 @@ To test the model methods the following data generating process (DGP) is used:
 		y = mu_0 .+ (mu_1 - mu_0) .* d .+ (e_1 .- e_0) .* d
 		# set up model
 		epm = ExogenousParticipationModel(y, d)
-		ate_estimator += ate_estimator(epm)  # cumulative sum so that it can be avaraged out
+		println(sum(epm.y[epm.d == 1]) / sum(epm.d))
+		atehat_sum += ate_estimator(epm)  # cumulative sum so that it can be averaged out
 	end
-	@test isapprox(ate_estimator / reps, mu_1 - mu_0) == true
+	println(atehat_sum)
+	@test isapprox(atehat_sum / reps, mu_1 - mu_0, atol=1) == true
 end
