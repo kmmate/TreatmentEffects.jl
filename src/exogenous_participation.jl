@@ -113,7 +113,7 @@ bootstrap_pvalue = bootstrap_htest(epm, 2.)
 function bootstrap_htest(m::ExogenousParticipationModel, ate_0::Float64; bs_reps::Int = 999)
 	n = length(m.y)
 	ate_hat = ate_estimator(m)
-	test_stat = sqrt(n) * (ate_estimator - ate_0)
+	test_stat = sqrt(n) * (ate_hat - ate_0)
 	# bootstrap distribution of ate_hat
 	atehat_bsdistribution = bootstrap_distribution(m)
 	# transform it to bootstrap distribution of test_stat
