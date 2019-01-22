@@ -47,7 +47,8 @@ end
 """
     bootstrap_distribution(m::ExogenousParticipationModel; bs_reps::Int = 999)
 
-Return bootstrap distribution of the average treatment effect estimator. 
+Return bootstrap distribution of the average treatment effect estimator.
+Bootstrap uses resampling with replacement. 
 See [`ate_estimator`](@ref).
 
 ##### Arguments
@@ -73,11 +74,53 @@ asym_var = var(sqrt(n) * (bs_dist - mean(bs_dist)))
 """
 function bootstrap_distribution(m::ExogenousParticipationModel; bs_reps::Int = 999)
 	n = length(m.y)
-	#bs_dist = Array{Float64}(undef, bs_reps)
 	bs_dist = @distributed (vcat) for rep in 1:bs_reps
-		# bootstrap resampling
+		# bootstrap resampling with replacement
 		bs_idx = rand(1:n, n)
 		epm = ExogenousParticipationModel(m.y[bs_idx], m.d[bs_idx])
 		ate_estimator(epm)
 	end
+end
+
+
+"""
+    bootstrap_htest(m::ExogenousParticipationModel, ate_0::Float64; bs_reps::Int = 999)
+
+Test H_0: ATE = `ate_0` against H_1: ATE != `ate_0`, using bootstrap based distribution
+of the average treatment effect estimator.
+Bootstrap uses resampling with replacement. 
+See [`ate_estimator`](@ref).
+
+##### Arguments
+- `m`::ExogenousParticipationModel : ExogenousParticipationModel model type
+- `ate_0`::Float64 : H_0: ATE = `ate_0`
+- `bs_reps`::Int : Number of bootstrap repetitions
+
+##### Returns
+- `p_value`::Float64 : empirical p-value
+
+##### Examples
+```julia
+using TreatmentEffects, CSV
+data = read_csv("observational_data.csv")
+y = data[:outcome]
+d = data[:treatment_participation]
+epm = ExogenousParticipationModel(y, d)
+# test H_0: ATE = 2. against H_1: ATE != 2.
+bootstrap_pvalue = bootstrap_htest(epm, 2.)
+```
+"""
+function bootstrap_htest(m::ExogenousParticipationModel, ate_0::Float64; bs_reps::Int = 999)
+	n = length(m.y)
+	ate_hat = ate_estimator(m)
+	test_stat = sqrt(n) * (ate_estimator - ate_0)
+	# bootstrap distribution of ate_hat
+	atehat_bsdistribution = bootstrap_distribution(m)
+	# transform it to bootstrap distribution of test_stat
+	teststat_bsdistribution = @. sqrt(n) * (atehat_bsdistribution - ate_0)
+	# number of values more extreme than observed test_stat
+	rejections = sum(abs(teststat_bsdistribution) .> abs(test_stat))
+	# normalise to obtain empirical p-value
+	p_value = rejections / bs_reps
+	return p_value
 end
