@@ -113,13 +113,13 @@ bootstrap_pvalue = bootstrap_htest(epm, 2.)
 function bootstrap_htest(m::ExogenousParticipationModel, ate_0::Float64; bs_reps::Int = 999)
 	n = length(m.y)
 	ate_hat = ate_estimator(m)
-	test_stat = (sqrt(n) * (ate_hat - ate_0)) ^ 2
+	test_stat = sqrt(n) * (ate_hat - ate_0)
 	# bootstrap distribution of ate_hat
 	atehat_bsdistribution = bootstrap_distribution(m)
 	# transform it to bootstrap distribution of test_stat
-	teststat_bsdistribution = @. (sqrt(n) * (atehat_bsdistribution - ate_hat)) ^ 2
+	teststat_bsdistribution = @. sqrt(n) * (atehat_bsdistribution - mean(atehat_bsdistribution))
 	# number of values more extreme than observed test_stat
-	rejections = sum(teststat_bsdistribution .> test_stat)
+	rejections = sum(abs.(teststat_bsdistribution) .> abs.(test_stat))
 	# normalise to obtain empirical p-value
 	p_value = rejections / bs_reps
 	return p_value
