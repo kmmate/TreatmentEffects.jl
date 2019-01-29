@@ -15,5 +15,7 @@ EndogenousNoncomplianceModel
 ObservationalModel
 ExogenousParticipationModel
 CIAModel
+MatchingModel
+RDDModel
 InterferenceModel
 ```

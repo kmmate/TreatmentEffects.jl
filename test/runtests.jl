@@ -5,7 +5,12 @@ Test for TreatmentEffects.jl
 @date: 18-Jan-2019
 
 =#
-using TreatmentEffects, Test, Random, Distributions
+using TreatmentEffects,
+	  Test,
+	  Random,
+	  Distributions,
+	  Distributed,
+	  SharedArrays
 
 tests = ["test_exogenous_participation.jl",
 		 "test_cia.jl",

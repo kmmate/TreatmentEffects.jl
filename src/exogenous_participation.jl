@@ -48,8 +48,8 @@ end
     bootstrap_distribution(m::ExogenousParticipationModel; bs_reps::Int = 999)
 
 Return bootstrap distribution of the average treatment effect estimator.
-Bootstrap uses resampling with replacement. 
 See [`ate_estimator`](@ref).
+Bootstrap uses resampling with replacement. 
 
 ##### Arguments
 - `m`::ExogenousParticipationModel : ExogenousParticipationModel model type
@@ -57,7 +57,7 @@ See [`ate_estimator`](@ref).
 
 ##### Returns
 - `dist`::Array{Float64} : `bs_reps`-long array,
-	each entry corresponds to a bootstrap sample
+	each entry corresponds to a bootstrap sample 
 
 ##### Examples
 ```julia
@@ -88,8 +88,8 @@ end
 
 Test H_0: ATE = `ate_0` against H_1: ATE != `ate_0`, using bootstrap based distribution
 of the average treatment effect estimator.
-Bootstrap uses resampling with replacement. 
 See [`ate_estimator`](@ref).
+Bootstrap uses resampling with replacement. 
 
 ##### Arguments
 - `m`::ExogenousParticipationModel : ExogenousParticipationModel model type
@@ -116,8 +116,9 @@ function bootstrap_htest(m::ExogenousParticipationModel, ate_0::Float64; bs_reps
 	test_stat = sqrt(n) * (ate_hat - ate_0)
 	# bootstrap distribution of ate_hat
 	atehat_bsdistribution = bootstrap_distribution(m)
-	# transform it to bootstrap distribution of test_stat
-	teststat_bsdistribution = @. sqrt(n) * (atehat_bsdistribution - sum(atehat_bsdistribution) / bs_reps)
+	# transform it to bootstrap distribution of test_stat. Under H_0 E[ate_hat]=ate=ate_0
+	teststat_bsdistribution = @. sqrt(n) * (atehat_bsdistribution -
+	 	sum(atehat_bsdistribution) / bs_reps)
 	# number of values more extreme than observed test_stat
 	rejections = sum(abs.(teststat_bsdistribution) .> abs.(test_stat))
 	# normalise to obtain empirical p-value

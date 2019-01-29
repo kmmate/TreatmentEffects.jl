@@ -1,7 +1,6 @@
 module TreatmentEffects
 
 export
-# ExogenousParticipationModel
 	ExogenousParticipationModel,
 	ate_estimator,
 	bootstrap_distribution,
