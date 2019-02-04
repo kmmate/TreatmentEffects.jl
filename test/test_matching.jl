@@ -12,9 +12,10 @@ Remarks
 # testing ate_matchingestimator
 @testset "ate_matchingestimator" begin
 	# read example dataset
-	y = CSV.read("data//matching//y.csv")
-	d = CSV.read("data//matching//d.csv")
-	x = CSV.read("data//matching//X.csv")'
+	datapath = joinpath(dirname(pathof(TreatmentEffects)), "\\test\\data\\mathcing\\")
+	y = CSV.read(joinpath(datapath, "y.csv"), header=false)
+	d = CSV.read(joinpath(datapath, "d.csv"), header=false)
+	x = CSV.read(joinpath(datapath, "X.csv"), header=false)
 	# set up model
 	mam = MatchingModel(y, d, x)
 	# estimate ATE
