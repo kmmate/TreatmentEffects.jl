@@ -10,10 +10,12 @@ using TreatmentEffects,
 	  Random,
 	  Distributions,
 	  Distributed,
-	  SharedArrays
+	  SharedArrays,
+	  CSV
 
 tests = ["test_exogenous_participation.jl",
-		 "test_cia.jl",
+		 "test_matching.jl",
+		 "test_rdd.jl",
 		 "test_exogenous_noncompliance.jl",
 		 "test_endogenous_noncompliance.jl",
 		 "test_perfect_compliance.jl"]
@@ -21,7 +23,7 @@ tests = ["test_exogenous_participation.jl",
 
 Random.seed!(19970531)
 
-println("Running tests:")
+println("Running tests...")
 for t in tests
 	println("testing: ", t[6:end])
 	include(t)

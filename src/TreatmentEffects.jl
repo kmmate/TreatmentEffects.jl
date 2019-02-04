@@ -8,4 +8,6 @@ export
 
 include("modeltypes.jl")
 include("exogenous_participation.jl")
+include("estimators.jl")
+include("matching.jl")
 end

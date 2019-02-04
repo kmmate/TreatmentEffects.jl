@@ -175,7 +175,7 @@ end
 """
 Represent Conditional Independence Model.  
 
-Given a set of covariate(s), potential outcomes independent of participation, 
+Given a set of covariate(s), potential outcomes are independent of participation, 
 that is given ``x``, ``[Y(0), Y(1)]`` is independent of ``D``.
 
 It is assumed that the only source of uncertainty is sampling. 
@@ -188,18 +188,20 @@ abstract type CIAModel <: ObservationalModel end
 """
 Represent a Matching Model.
 
-A Mathcing Model is the most general case of the Conditional Independence Model where
-given a set of covariates, potential outcomes independent of participation, 
+A Mathcing Model is the most general subtype of the Conditional Independence Model where
+given a set of covariates, potential outcomes are independent of participation, 
 that is given ``x``, ``[Y(0), Y(1)]`` is independent of ``D``.
 
 It is assumed that the only source of uncertainty is sampling. 
-That is, the observed dataset ``{(y_i, d_i, x_i)} i=1,...,n`` is and independent sample
+That is, the observed dataset ``{(y_i, d_i, x_i)} i=1,...,n`` is an independent sample
 from a population, and the experimenter has no control over treatment participation, ``D``.
 
 ##### Fields
-- `y` : Observed outcome of interest
-- `d` : Treatment participation
-- `x` : Covariates
+- `y`::Array{<:Real, 1} : Observed outcome of interest
+- `d`::Array{<:Real, 1} : Treatment participation
+- `x`::Array{<:Real} : Covariates, either ``n``-long Array{<:Real, 1} or 
+	``K``-by-``n`` Array{<:Real} where ``n`` is the number of observations and
+	``K`` is the number of covariates
 
 ##### Examples
 ```julia
@@ -216,10 +218,24 @@ mutable struct MatchingModel <: CIAModel
 	d::Array{<:Real, 1}
 	x::Array{<:Real}
 	function MatchingModel(y::Array{<:Real, 1}, d::Array{<:Real, 1}, x::Array{<:Real})
-		if size(y)[1] == size(d)[1] == size(x)[1]
-			return new(y, d, x)			
-		else
-			error("`y`, `d`, `x` must have the same number of observations") 
+		try
+			# dimension check for multiple covariates
+			if size(y)[1] == size(d)[1] == size(x)[2]
+				return new(y, d, x)			
+			else
+				error("`y`, `d`, `x` must have the same number of observations.
+					pay attention to the size of `x`") 
+			end	
+		catch ex
+			if isa(ex, BoundsError)
+				# dimension check for single covariate
+				if size(y)[1] == size(d)[1] == size(x)[1]
+					return new(y, d, x)			
+				else
+					error("`y`, `d`, `x` must have the same number of observations.
+						pay attention to the size of `x`") 
+				end			
+			end
 		end
 	end
 end
@@ -237,7 +253,7 @@ and ``D_i = 0 `` otherwise.
 
 
 It is assumed that the only source of uncertainty is sampling. 
-That is, the observed dataset ``{(y_i, d_i, x_i)} i=1,...,n`` is and independent sample
+That is, the observed dataset ``{(y_i, d_i, x_i)} i=1,...,n`` is an independent sample
 from a population.
 
 ##### Fields

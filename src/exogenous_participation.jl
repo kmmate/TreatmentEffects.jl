@@ -23,7 +23,7 @@ outcomes ``[Y(0) Y(1)]``, the estimator is consistent and unbiased for ATE
 -`m::ExogenousParticipationModel` : ExogenousParticipationModel model type
 
 ##### Returns
-- `ate_hat`: estimted ATE
+- `ate_hat`: estimated ATE
 
 ##### Examples
 ```julia
