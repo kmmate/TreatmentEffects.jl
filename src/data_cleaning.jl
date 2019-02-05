@@ -61,7 +61,8 @@ julia> println(x)
 [10]
 ```
 """
-function drop_missing!(y::Array{Any, 1}, d::Array{Any, 1}, x::Array{Any, 1})
+#=
+function drop_missing(y::Array{Any, 1}, d::Array{Any, 1}, x::Array{Any, 1})
 	# indices with not missing entries
 	not_missing_idx = (isequal.(y, missing) .== false) .* (isequal.(d, missing) .== false) .*
 	 (isequal.(x, missing) .== false)
@@ -92,7 +93,7 @@ julia> println(x)
 [20 30 40]
 ```
 """
-function drop_missing!(y::Array{Any, 1}, d::Array{Any 1}, x::Array{Any, 1})
+function drop_missing(y::Array{Any, 1}, d::Array{Any 1}, x::Array{Any, 1})
 	# indices with not missing entries
 	# check y and d
 	not_missing_idx = (isequal.(y, missing) .== false) .* (isequal.(d, missing) .== false)
@@ -105,3 +106,4 @@ function drop_missing!(y::Array{Any, 1}, d::Array{Any 1}, x::Array{Any, 1})
 	x = x[not_missing_idx, :]
 	return y, d, x
 end
+=#
