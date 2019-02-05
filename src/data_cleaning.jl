@@ -78,7 +78,7 @@ function drop_missing(y::Array{<:Union{Missing, Any}, 1}, d::Array{<:Union{Missi
 	y_dropped_uniontype = y[notmissing_idx]
 	d_dropped_uniontype = d[notmissing_idx]
 	x_dropped_uniontype = x[notmissing_idx]
-	notmissing_length = sum(not_missing_idx)
+	notmissing_length = sum(notmissing_idx)
 	y_dropped = zeros(notmissing_length)
 	d_dropped = zeros(notmissing_length)
 	x_dropped = zeros(notmissing_length)
@@ -128,7 +128,7 @@ function drop_missing(y::Array{<:Union{Missing, Any}, 1},
 	y_dropped_uniontype = y[notmissing_idx]
 	d_dropped_uniontype = d[notmissing_idx]
 	x_dropped_uniontype = x[notmissing_idx, :]
-	notmissing_length = sum(not_missing_idx)
+	notmissing_length = sum(notmissing_idx)
 	y_dropped = zeros(notmissing_length)
 	d_dropped = zeros(notmissing_length)
 	x_dropped = zeros(notmissing_length, size(x)[2])
