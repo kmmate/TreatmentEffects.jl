@@ -122,7 +122,7 @@ function drop_missing(y::Array{<:Union{Missing, Any}, 1},
 	# check y and d
 	not_missing_idx = (isequal.(y, missing) .== false) .* (isequal.(d, missing) .== false)
 	# check x's
-	for col in 1:size(x)[2]:
+	for col in 1:size(x)[2]
 		not_missing_idx = not_missing_idx .* (isequal.(x[:, col], missing) .==false)
 	end
 	y_dropped_uniontype = y[notmissing_idx]
