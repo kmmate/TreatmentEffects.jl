@@ -49,7 +49,7 @@ Predict the propensity score P(D=1|X) with logistic regression.
 """
 function logit_predict(df::DataFrame, df_x_names::Array{Symbol, 1})
 	lhs = :d
-	rhs = Symbol(join([String(col) for col in df_x_names], "+"))
+	rhs = Symbol(join([String(col) for col in df_x_names], " + "))
 	logit = glm(@eval(@formula($(lhs) ~ $(rhs))), df, Bernoulli(), LogitLink())
     pscore_hat = predict(logit)
     return pscore_hat
