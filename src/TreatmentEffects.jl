@@ -1,7 +1,7 @@
 module TreatmentEffects
 
 export
-	drop_missing!,
+	drop_missing,
 	ExogenousParticipationModel,
 	ate_estimator,
 	bootstrap_distribution,
