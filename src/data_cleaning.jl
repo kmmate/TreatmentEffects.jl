@@ -140,4 +140,3 @@ function drop_missing(y::Array{<:Union{Missing, Any}, 1},
 	end
 	return y_dropped, d_dropped, x_dropped
 end
-=#
