@@ -96,7 +96,7 @@ the k-nearest units in the other (treatment or control) group.
 function estimate_counterfactual(k::Int64, distance_array::Array{Float64, 1}, y_pool::Array{<:Real, 1})
     # indices of units in the other group:
     # the first index is that of the other-group-unit with the smallest distance from the unit to match to
-    ordered_index = sortperm(distance_vector)
+    ordered_index = sortperm(distance_array)
     # average the outcomes of the m nearest other-group-units to get Yhat_i(D)
     y_counterfactual_hat = sum(y_pool[ordered_index[1:k]]) / k
     return y_counterfactual_hat
