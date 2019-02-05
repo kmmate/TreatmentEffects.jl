@@ -24,8 +24,11 @@ function predict_propscore(d::Array{<:Real, 1}, x::Array{<:Real}, estimation_met
 		error("`estimation_method` must be either :logistic or :nonparametric")
 	# logit
 	elseif estimation_method == :logit
-		df = DataFrame(x=x, d=d)
-		pscore_hat = logit_predict(df)
+		df_d = DataFrame(d[:, :], [:d])
+		df_x_names = [Symbol("x$i") for i in 1:size(x)[2]]
+		df_x = DataFrame(x, x_names)
+		df = hcat(df_d, df_x)
+		pscore_hat = logit_predict(df, df_x_names)
 		return pscore_hat
 	# nonparametric
 	elseif estimation_method == :nonparametric
@@ -44,8 +47,10 @@ Parametric auxiliary estimators for internal use
 
 Predict the propensity score P(D=1|X) with logistic regression.
 """
-function logit_predict(df::DataFrame)
-	logit = glm(@formula(d ~ x), df, Bernoulli(), LogitLink())
+function logit_predict(df::DataFrame, df_x_names::Array{Symbol, 1})
+	lhs = :d
+	rhs = Symbol(join([String(col) for col in df_x_names], "+"))
+	logit = glm(@eval(@formula($(lhs) ~ $(rhs))), df, Bernoulli(), LogitLink())
     pscore_hat = predict(logit)
     return pscore_hat
 end

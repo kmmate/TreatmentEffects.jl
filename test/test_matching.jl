@@ -11,9 +11,12 @@ Remarks
 
 # testing ate_matchingestimator
 @testset "ate_matchingestimator" begin
+	#		Real data test 		  #
+	#-----------------------------#
+	
 	# read example dataset
 	# subsampling
-	n_subsample = 10_000
+	n_subsample = 25_000
 	subsample_idx = rand(1:60_000, n_subsample)
 	#datapath = normpath(joinpath(dirname(pathof(TreatmentEffects)), "..", "test\\data\\mathcing"))
 	#y = CSV.read(joinpath(datapath, "y.csv"), header=false)
@@ -29,9 +32,16 @@ Remarks
 	# set up model
 	mam = MatchingModel(y, d, x)
 	# estimate ATE
+	#	---	test mathcing on covariates
 	numberof_neighbours = 1
 	matching_method = :covariates
 	ate_hat = ate_matchingestimator(mam, k=numberof_neighbours, matching_method=matching_method)
 	println("ATE_hat = ", ate_hat)
-	@test isapprox(ate_hat, -200, atol=10) == true
+	@test isapprox(ate_hat, -200, atol=50) == true
+	#	---	test mathcing on covariates
+	numberof_neighbours = 1
+	matching_method = :propscore_logit
+	ate_hat = ate_matchingestimator(mam, k=numberof_neighbours, matching_method=matching_method)
+	println("ATE_hat = ", ate_hat)
+	@test isapprox(ate_hat, -200, atol=50) == true
 end
