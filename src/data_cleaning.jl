@@ -137,6 +137,7 @@ function drop_missing(y::Array{<:Union{Missing, Any}, 1},
 		d_dropped[i] = d_dropped_uniontype[i]
 		for col in 1:size(x)[2]
 			x_dropped[i, col] = x_dropped_uniontype[i, col]
+		end
 	end
 	return y_dropped, d_dropped, x_dropped
 end
