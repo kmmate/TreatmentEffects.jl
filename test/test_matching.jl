@@ -20,12 +20,12 @@ Remarks
 		"\\matching\\y.csv", header=false)[:1])
 	d_raw = Array(CSV.read("C:\\Users\\Máté\\.julia\\packages\\TreatmentEffects\\SM8SJ\\test\\data"*
 		"\\matching\\d.csv", header=false)[:1])
-	x_raw = convert(Matrix, CSV.read("C:\\Users\\Máté\\.julia\\packages\\TreatmentEffects\\SM8SJ\\test\\data"*
-		"\\matching\\X.csv", header=false, delim=';'))
+	x_raw = Array(convert(Matrix, CSV.read("C:\\Users\\Máté\\.julia\\packages\\TreatmentEffects\\SM8SJ\\test\\data"*
+		"\\matching\\X.csv", header=false, delim=';')))
 	y, d, x = drop_missing(y_raw, d_raw, x_raw)
+	println(size(y), size(d), size(x[1:10000, 1:end]))
 	# set up model
-	mam = MatchingModel(y, d, x')
-	println(typeof(mam))
+	mam = MatchingModel(y[1:10000], d[1:10000], x[1:10000, 1:end])
 	# estimate ATE
 	numberof_neighbours = 1
 	matching_method = :covariates

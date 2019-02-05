@@ -51,9 +51,8 @@ function ate_matchingestimator(m::MatchingModel; k::Int64 = 1, matching_method::
     # (predict porpensity score) and compute distances based on matching_method
     distance_matrix = zeros(n_t, n_c)
     if matching_method == :covariates
-    	distance = Mahalanobis()
     	# n_t-by-n_c array with  element (i, j) = distance between 'i'th treated and 'j'th control units
-    	Distances.pairwise!(distance_matrix, distance, x_t', x_c')
+    	Distances.pairwise!(distance_matrix, Mahalanobis(), x_t', x_c')
     elseif matching_method == :propscore_logit || matching_method == :propscore_nonparametric
     	# estimate propensity score
     	if matching_method == :propscore_logit
@@ -63,9 +62,8 @@ function ate_matchingestimator(m::MatchingModel; k::Int64 = 1, matching_method::
     	end
     	phat_t = phat[m.d .== 1]  # est. propensity score in treatment group
     	phat_c = phat[m.d .== 0]  # est. propensity score in control group
-    	distance = Euclidean()
     	# n_t-by-n_c array with  element (i, j) = distance between 'i'th treated and 'j'th control units
-    	Distances.pairwise!(distance_matrix, distance, phat_t, phat_c)
+    	Distances.pairwise!(distance_matrix, Euclidean(), phat_t, phat_c)
     end
     # estimate a control outcome, Y(0), for each treated unit with matching
     yc_hat = zeros(n_t)
