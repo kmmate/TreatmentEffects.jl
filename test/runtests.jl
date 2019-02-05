@@ -11,9 +11,11 @@ using TreatmentEffects,
 	  Distributions,
 	  Distributed,
 	  SharedArrays,
-	  CSV
+	  CSV,
+	  DataFrames
 
 tests = [#"test_exogenous_participation.jl",
+		 "test_data_cleaning.jl"
 		 "test_matching.jl",
 		 "test_rdd.jl",
 		 "test_exogenous_noncompliance.jl",
