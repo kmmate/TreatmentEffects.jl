@@ -26,7 +26,7 @@ function predict_propscore(d::Array{<:Real, 1}, x::Array{<:Real}, estimation_met
 	elseif estimation_method == :logit
 		df_d = DataFrame(d[:, :], [:d])
 		df_x_names = [Symbol("x$i") for i in 1:size(x)[2]]
-		df_x = DataFrame(x, x_names)
+		df_x = DataFrame(x, df_x_names)
 		df = hcat(df_d, df_x)
 		pscore_hat = logit_predict(df, df_x_names)
 		return pscore_hat

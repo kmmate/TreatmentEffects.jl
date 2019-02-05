@@ -4,6 +4,7 @@ Test for TreatmentEffects.jl
 @author: Mate Kormos
 @date: 18-Jan-2019
 
+include("C:\\Users\\Máté\\Dropbox\\tinbergen\\TreatmentEffects.jl\\test\\runtests.jl")
 =#
 using TreatmentEffects,
 	  Test,

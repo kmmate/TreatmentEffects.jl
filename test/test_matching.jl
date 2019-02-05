@@ -35,9 +35,9 @@ Remarks
 	#	---	test mathcing on covariates
 	numberof_neighbours = 1
 	matching_method = :covariates
-	ate_hat = ate_matchingestimator(mam, k=numberof_neighbours, matching_method=matching_method)
-	println("ATE_hat = ", ate_hat)
-	@test isapprox(ate_hat, -200, atol=50) == true
+	#ate_hat = ate_matchingestimator(mam, k=numberof_neighbours, matching_method=matching_method)
+	#println("ATE_hat = ", ate_hat)
+	#@test isapprox(ate_hat, -200, atol=50) == true
 	#	---	test mathcing on covariates
 	numberof_neighbours = 1
 	matching_method = :propscore_logit
