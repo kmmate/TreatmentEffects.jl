@@ -200,7 +200,7 @@ from a population, and the experimenter has no control over treatment participat
 - `y`::Array{<:Real, 1} : Observed outcome of interest
 - `d`::Array{<:Real, 1} : Treatment participation
 - `x`::Array{<:Real} : Covariates, either ``n``-long Array{<:Real, 1} or 
-	``K``-by-``n`` Array{<:Real} where ``n`` is the number of observations and
+	``n``-by-``K`` Array{<:Real} where ``n`` is the number of observations and
 	``K`` is the number of covariates
 
 ##### Examples
@@ -218,25 +218,12 @@ mutable struct MatchingModel <: CIAModel
 	d::Array{<:Real, 1}
 	x::Array{<:Real}
 	function MatchingModel(y::Array{<:Real, 1}, d::Array{<:Real, 1}, x::Array{<:Real})
-		try
-			# dimension check for multiple covariates
-			if size(y)[1] == size(d)[1] == size(x)[2]
-				return new(y, d, x)			
-			else
-				error("`y`, `d`, `x` must have the same number of observations.
-					pay attention to the size of `x`") 
-			end	
-		catch ex
-			if isa(ex, BoundsError)
-				# dimension check for single covariate
-				if size(y)[1] == size(d)[1] == size(x)[1]
-					return new(y, d, x)			
-				else
-					error("`y`, `d`, `x` must have the same number of observations.
-						pay attention to the size of `x`") 
-				end			
-			end
-		end
+		# dimension check for multiple covariates
+		if size(y)[1] == size(d)[1] == size(x)[1]
+			return new(y, d, x)			
+		else
+			error("`y`, `d`, `x` must have the same number of observations") 
+		end	
 	end
 end
 

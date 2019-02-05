@@ -38,9 +38,9 @@ function ate_matchingestimator(m::MatchingModel; k::Int64 = 1, matching_method::
     y_t = m.y[m.d .== 1]  # y of those in treatment group: y | d = 1
     y_c = m.y[m.d .== 0]  # y of those in control group: y | d = 0
     try
-    	# x cotains more than one covariate
-    	x_t = m.x[:, m.d .== 1]  # x of those in treatment group: x | d = 1
-    	x_c = m.x[:, m.d .== 0]  # x of those in control group: x | d = 0
+    	# x contains more than one covariate
+    	x_t = m.x[m.d .== 1, :]  # x of those in treatment group: x | d = 1
+    	x_c = m.x[m.d .== 0, :]  # x of those in control group: x | d = 0
     catch ex
     	if isa(ex, BoundsError)
     		# x contains only one covariate
@@ -53,7 +53,7 @@ function ate_matchingestimator(m::MatchingModel; k::Int64 = 1, matching_method::
     if matching_method == :covariates
     	distance = Mahalanobis()
     	# n_t-by-n_c array with  element (i, j) = distance between 'i'th treated and 'j'th control units
-    	Distances.pairwise!(distance_matrix, distance, x_t, x_c)
+    	Distances.pairwise!(distance_matrix, distance, x_t', x_c')
     elseif matching_method == :propscore_logit || matching_method == :propscore_nonparametric
     	# estimate propensity score
     	if matching_method == :propscore_logit
