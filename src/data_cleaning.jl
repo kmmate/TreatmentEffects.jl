@@ -28,10 +28,12 @@ julia> println(y)
 function drop_missing(y::Array{<:Union{Missing, Any}, 1}, d::Array{<:Union{Missing, Any}, 1})
 	# indices with not missing entries
 	not_missing_idx = (isequal.(y, missing) .== false) .* (isequal.(d, missing) .== false)
-	y_dropped, d_dropped = zeros(sum(not_missing_idx)), zeros(sum(not_missing_idx)) 
+	y_dropped_uniontype = y[not_missing_idx]
+	d_dropped_uniontype = d[not_missing_idx]
+	y_dropped, d_dropped = zeros(sum(not_missing_idx)), zeros(sum(not_missing_idx))
 	for i in 1:length(y_dropped)
-		y_dropped[i] = y[not_missing_idx][i]
-		d_dropped[i] = d[not_missing_idx][i]
+		y_dropped[i] = y_dropped_uniontype[i]
+		d_dropped[i] = d_dropped_uniontype[i]
 	end
 	return y_dropped, d_dropped
 end
