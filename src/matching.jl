@@ -7,7 +7,7 @@ Defines methods (estimators) for MatchingModel <: CIAModel type.
 
 =#
 
-using Distances
+using StatsBase, Distances
 
 """
 
@@ -49,10 +49,12 @@ function ate_matchingestimator(m::MatchingModel; k::Int64 = 1, matching_method::
     	end
     end
     # (predict porpensity score) and compute distances based on matching_method
-    #distance_matrix = zeros(n_t, n_c)
+    distance_matrix = zeros(n_t, n_c)
     if matching_method == :covariates
+    	# estimate sample covariance matrix for distance computation
+    	cov_hat = StatsBase.cov(m.x)
     	# n_t-by-n_c array with  element (i, j) = distance between 'i'th treated and 'j'th control units
-    	distance_matrix = Distances.pairwise(Mahalanobis(), x_t', x_c')
+    	Distances.pairwise!(distance_matrix, Mahalanobis(inv(cov_hat)), x_t', x_c')
     elseif matching_method == :propscore_logit || matching_method == :propscore_nonparametric
     	# estimate propensity score
     	if matching_method == :propscore_logit
