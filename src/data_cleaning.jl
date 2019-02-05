@@ -120,10 +120,10 @@ function drop_missing(y::Array{<:Union{Missing, Any}, 1},
 	x::Array{<:Union{Missing, Any}, 2})
 	# indices with not missing entries
 	# check y and d
-	not_missing_idx = (isequal.(y, missing) .== false) .* (isequal.(d, missing) .== false)
+	notmissing_idx = (isequal.(y, missing) .== false) .* (isequal.(d, missing) .== false)
 	# check x's
 	for col in 1:size(x)[2]
-		not_missing_idx = not_missing_idx .* (isequal.(x[:, col], missing) .==false)
+		notmissing_idx = not_missing_idx .* (isequal.(x[:, col], missing) .==false)
 	end
 	y_dropped_uniontype = y[notmissing_idx]
 	d_dropped_uniontype = d[notmissing_idx]
