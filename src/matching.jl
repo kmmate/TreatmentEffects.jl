@@ -37,17 +37,8 @@ function ate_matchingestimator(m::MatchingModel; k::Int64 = 1, matching_method::
     n_c = Int(n - n_t)  # number of control units
     y_t = m.y[m.d .== 1]  # y of those in treatment group: y | d = 1
     y_c = m.y[m.d .== 0]  # y of those in control group: y | d = 0
-    try
-    	# x contains more than one covariate
-    	x_t = m.x[m.d .== 1, :]  # x of those in treatment group: x | d = 1
-    	x_c = m.x[m.d .== 0, :]  # x of those in control group: x | d = 0
-    catch ex
-    	if isa(ex, BoundsError)
-    		# x contains only one covariate
-    		x_t = m.x[m.d .== 1] # x of those in treatment group: x | d = 1
-    		x_c = m.x[m.d .== 0]  # x of those in control group: x | d = 0
-    	end
-    end
+    x_t = m.x[m.d .== 1, :]  # x of those in treatment group: x | d = 1
+    x_c = m.x[m.d .== 0, :]  # x of those in control group: x | d = 0
     # (predict porpensity score) and compute distances based on matching_method
     distance_matrix = zeros(n_t, n_c)
     if matching_method == :covariates
