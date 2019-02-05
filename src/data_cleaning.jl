@@ -7,31 +7,35 @@ Define data cleaning methods
 =#
 
 """
-    drop_missing!(y::Array{Any, 1}, d::Array{Any, 1})
+    drop_missing(y::Array{<:Union{Missing, Any}, 1}, d::Array{<:Union{Missing, Any}, 1})
 
 Drop rows with missing observation.
 Row ``i`` is dropped whenever ``y[i]`` or ``d[i]`` is a missing value.
 
 ###### Arguments
-- `y`::Array{Any, 1} : Outcome variable
-- `d`::Array{Any, 1} : Treatment participation
+- `y`::Array{<:Union{Missing, Any}, 1} : Outcome variable
+- `d`::Array{<:Union{Missing, Any}, 1} : Treatment participation
+
+##### Returns
+- `y_dropped`::Array{<:Any, 1} : Outcome variable with missing rows dropped
+- `d_dropped`::Array{<:Any, 1} : Treatment participation with missing rows dropped
 
 ##### Examples
 ```julia-repl
-julia> y = [1, 2, missing]
-julia> d = [4, missing, 5]
-julia> drop_missing!(y, d)
-julia> println(y)
-[1]
+julia> y = [1, 2, missing];
+julia> d = [4, missing, 5];
+julia> drop_missing(y, d)
+[1], [4]
 ```
 """
 function drop_missing(y::Array{<:Union{Missing, Any}, 1}, d::Array{<:Union{Missing, Any}, 1})
 	# indices with not missing entries
-	not_missing_idx = (isequal.(y, missing) .== false) .* (isequal.(d, missing) .== false)
-	y_dropped_uniontype = y[not_missing_idx]
-	d_dropped_uniontype = d[not_missing_idx]
-	y_dropped, d_dropped = zeros(sum(not_missing_idx)), zeros(sum(not_missing_idx))
-	for i in 1:length(y_dropped)
+	notmissing_idx = (isequal.(y, missing) .== false) .* (isequal.(d, missing) .== false)
+	y_dropped_uniontype = y[notmissing_idx]
+	d_dropped_uniontype = d[notmissing_idx]
+	notmissing_length = sum(notmissing_idx)
+	y_dropped, d_dropped = zeros(notmissing_length), zeros(notmissing_length)
+	for i in 1:notmissing_length
 		y_dropped[i] = y_dropped_uniontype[i]
 		d_dropped[i] = d_dropped_uniontype[i]
 	end
@@ -40,48 +44,66 @@ end
 
 
 """
-    drop_missing!(y::Array{Any, 1}, d::Array{Any, 1},
-     x::Array{Any, 1})
+    drop_missing(y::Array{<:Union{Missing, Any}, 1}, d::Array{<:Union{Missing, Any}, 1},
+	x::Array{<:Union{Missing, Any}, 1})
 
 Drop rows with missing observation.
 Row ``i`` is dropped whenever ``y[i]`` or ``d[i]`` or ``x[i]`` is a missing value.
 
 ###### Arguments
-- `y`::Array{Any, 1} : Outcome variable
-- `d`::Array{Any, 1} : Treatment participation
-- `x`::Array{Any, 1} : Covariate
+- `y`::Array{<:Union{Missing, Any}, 1} : Outcome variable
+- `d`::Array{<:Union{Missing, Any}, 1} : Treatment participation
+- `x`::Array{<:Union{Missing, Any}, 1} : Covariate
+
+##### Returns
+- `y_dropped`::Array{<:Any, 1} : Outcome variable with missing rows dropped
+- `d_dropped`::Array{<:Any, 1} : Treatment participation with missing rows dropped
+- `x_dropped`::Array{<:Any, 1} : Covariate with missing rows dropped
 
 ##### Examples
 ```julia-repl
-julia> y = [1, 2, missing, 8]
-julia> d = [4, missing, 5, 9]
-julia> x = [10, 12, 18, missing]
-julia> drop_missing!(y, d, x)
+julia> y = [1, 2, missing, 8, 889];
+julia> d = [4, missing, 5, 9, 789];
+julia> x = [10, 12, 18, missing, 666];
+julia> y, d, x = drop_missing(y, d, x);
 julia> println(x)
-[10]
+[10, 666]
 ```
 """
-#=
-function drop_missing(y::Array{Any, 1}, d::Array{Any, 1}, x::Array{Any, 1})
+function drop_missing(y::Array{<:Union{Missing, Any}, 1}, d::Array{<:Union{Missing, Any}, 1},
+	x::Array{<:Union{Missing, Any}, 1})
 	# indices with not missing entries
-	not_missing_idx = (isequal.(y, missing) .== false) .* (isequal.(d, missing) .== false) .*
+	notmissing_idx = (isequal.(y, missing) .== false) .* (isequal.(d, missing) .== false) .*
 	 (isequal.(x, missing) .== false)
-	y = y[not_missing_idx]
-	d = d[not_missing_idx]
-	x = x[not_missing_idx]
-	return y, d, x
+	y_dropped_uniontype = y[notmissing_idx]
+	d_dropped_uniontype = d[notmissing_idx]
+	x_dropped_uniontype = x[notmissing_idx]
+	notmissing_length = sum(not_missing_idx)
+	y_dropped = zeros(notmissing_length)
+	d_dropped = zeros(notmissing_length)
+	x_dropped = zeros(notmissing_length)
+	for i in 1:notmissing_length
+		y_dropped[i] = y_dropped_uniontype[i]
+		d_dropped[i] = d_dropped_uniontype[i]
+		x_dropped[i] = x_dropped_uniontype[i]
+	end
+	return y_dropped, d_dropped, x_dropped
 end
 
+
+
 """
-    drop_missing!(y::Array{Any, 1}, d::Array{Any, 1}, x::Array{Any})
+    drop_missing(y::Array{<:Union{Missing, Any}, 1},
+		d::Array{<:Union{Missing, Any}, 1},
+ 		x::Array{<:Union{Missing, Any}, 2})
 
 Drop rows with missing observation.
 Row ``i`` is dropped whenever ``y[i]`` or ``d[i]`` or ``x[i, k]`` is a missing value for any ``k``.
 
 ###### Arguments
-- `y`::Array{Any, 1} : Outcome variable
-- `d`::Array{Any, 1} : Treatment participation
-- `x`::Array{Any} : Covariates, each row corresponds to an oberservation
+- `y`::Array{<:Union{Missing, Any}, 1} : Outcome variable
+- `d`::Array{<:Union{Missing, Any}, 1} : Treatment participation
+- `x`::Array{<:Union{Missing, Any}, 2} : Covariates, each row corresponds to an oberservation
 
 ##### Examples
 ```julia-repl
@@ -93,7 +115,9 @@ julia> println(x)
 [20 30 40]
 ```
 """
-function drop_missing(y::Array{Any, 1}, d::Array{Any 1}, x::Array{Any, 1})
+function drop_missing(y::Array{<:Union{Missing, Any}, 1},
+	d::Array{<:Union{Missing, Any}, 1},
+	x::Array{<:Union{Missing, Any}, 2})
 	# indices with not missing entries
 	# check y and d
 	not_missing_idx = (isequal.(y, missing) .== false) .* (isequal.(d, missing) .== false)
@@ -101,9 +125,19 @@ function drop_missing(y::Array{Any, 1}, d::Array{Any 1}, x::Array{Any, 1})
 	for col in 1:size(x)[2]:
 		not_missing_idx = not_missing_idx .* (isequal.(x[:, col], missing) .==false)
 	end
-	y = y[not_missing_idx]
-	d = d[not_missing_idx]
-	x = x[not_missing_idx, :]
-	return y, d, x
+	y_dropped_uniontype = y[notmissing_idx]
+	d_dropped_uniontype = d[notmissing_idx]
+	x_dropped_uniontype = x[notmissing_idx, :]
+	notmissing_length = sum(not_missing_idx)
+	y_dropped = zeros(notmissing_length)
+	d_dropped = zeros(notmissing_length)
+	x_dropped = zeros(notmissing_length, size(x)[2])
+	for i in 1:notmissing_length
+		y_dropped[i] = y_dropped_uniontype[i]
+		d_dropped[i] = d_dropped_uniontype[i]
+		for col in 1:size(x)[2]
+			x_dropped[i, col] = x_dropped_uniontype[i, col]
+	end
+	return y_dropped, d_dropped, x_dropped
 end
 =#
