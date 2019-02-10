@@ -206,10 +206,9 @@ from a population, and the experimenter has no control over treatment participat
 ##### Examples
 ```julia
 using TreatmentEffects, CSV
-data = read_csv("matchingmodel_data.csv")
-y = data[:outcome]
-d = data[:treatment_takeup]
-x = data[:covariates]
+y = Array(CSV.read("y_data.csv")[:1])  # [:1] to get Array{T, 1}
+d = Array(CSV.read("d_data.csv")[:1])
+x = Array(convert(Matrix, CSV.read("x_data.csv")))
 mam = MatchingModel(y, d, x)
 ```
 """

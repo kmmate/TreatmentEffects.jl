@@ -18,6 +18,9 @@ Predict propensity score based on estimation as specified by `estimation_method`
 - `d`::Array{<:Real, 1} : Binary outcome variable
 - `x`::Array{<:Real} : Covariates
 - `estimation_method`::Symbol : :logit or :nonparametric
+
+##### Returns
+- `pscore_hat`::Array{Float64, 1} : Predicted propensity score
 """
 function predict_propscore(d::Array{<:Real, 1}, x::Array{<:Real}, estimation_method::Symbol)
 	if in(estimation_method, [:logit, :nonparametric]) == false
@@ -43,11 +46,19 @@ Parametric auxiliary estimators for internal use
 =#
 
 """
-    logit_predict(df::DataFrame)  
+    logit_predict(df::DataFrame, df_x_names::Array{Symbol, 1})  
 
 Predict the propensity score P(D=1|X) with logistic regression.
+
+##### Arguments
+- `df`::DataFrame : DataFrame containing ``d`` and ``x``
+- `df_x_names`::Array{Symbol, 1} : Names of `x` variables
+
+##### Returns
+- `pscore_hat`::Array{Float64, 1} : Predicted propensity score
 """
 function logit_predict(df::DataFrame, df_x_names::Array{Symbol, 1})
+	# run `d` on all the covariates
 	lhs = :d
 	rhs = Expr(:call, :+, df_x_names...)
 	logit = glm(@eval(@formula($(lhs) ~ $(rhs))), df, Bernoulli(), LogitLink())
