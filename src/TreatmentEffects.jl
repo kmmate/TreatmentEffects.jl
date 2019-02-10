@@ -7,7 +7,8 @@ export
 	bootstrap_distribution,
 	bootstrap_htest,
 	MatchingModel,
-	ate_matchingestimator
+	ate_matchingestimator,
+	att_matchingestimator
 
 include("data_cleaning.jl")
 include("modeltypes.jl")
