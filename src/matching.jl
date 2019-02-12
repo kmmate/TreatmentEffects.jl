@@ -5,6 +5,9 @@
 
 Defines methods (estimators) for MatchingModel <: CIAModel type.
 
+TODO:
+	- bias correction for matching estimator
+	- nonparametric propensity score matching
 =#
 
 using StatsBase, Distances
@@ -68,12 +71,14 @@ function ate_matchingestimator(m::MatchingModel; k::Int64 = 1, matching_method::
     # estimate a control outcome, Y(0), for each treated unit with matching
     yc_hat = zeros(n_t)
     for treated_unit in 1:n_t
-        yc_hat[treated_unit] = estimate_counterfactual(k, distance_matrix[treated_unit, :], y_c)
+        @inbounds yc_hat[treated_unit] = estimate_counterfactual(k,
+        	distance_matrix[treated_unit, :], y_c)
     end
     # estimate a treated outcome, Y(1), for each control unit with matching
     yt_hat = zeros(n_c)
     for control_unit in 1:n_c
-        yt_hat[control_unit] = estimate_counterfactual(k, distance_matrix[:, control_unit], y_t)
+        @inbounds yt_hat[control_unit] = estimate_counterfactual(k,
+        	distance_matrix[:, control_unit], y_t)
     end
     # compute the ATE estimator: 1/n * sum_i(Yhat_i(1)-Yhat_i(0))
     ate_hat = 1 / n * (sum(y_t - yc_hat) + sum(yt_hat - y_c)) 
