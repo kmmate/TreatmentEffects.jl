@@ -180,8 +180,19 @@ ate_blockingestimator(mam)
 """
 function ate_blockingestimator(m::MatchingModel; propscore_estimation::Symbol=:logit,
 	block_boundaries::Array{Float64, 1}=[0., 0.2, 0.4, 0.6, 0.8, 1.])
+	# checks
+	if block_boundaries[1] != 0
+		error("`block_boundaries` must contain 0 as its first element")
+	elseif block_boundaries[end] != 1
+		error("`block_boundaries` must contain 1 as its last element")
+	end
+	if sort(block_boundaries) != block_boundaries
+		error("`block_boundaries` must be strictly increasing")
+	end
+	# sizes
 	n = size(m.y)[1]  # sample size
 	n_blocks = length(block_boundaries) - 1
+	# propensity score estimation
 	if propscore_estimation == :logit
 		phat = predict_propscore(m.d, m.x, :logit)
 	elseif propscore_estimation == :nonparametric
@@ -199,8 +210,8 @@ function ate_blockingestimator(m::MatchingModel; propscore_estimation::Symbol=:l
     # estimate ATE in each block
     for block_label in 1:n_blocks
     	# treatment and control outcomes in the block
-    	yt_block = m.y[(m.d == 1) .* (block_labels == block_label)]
-    	yc_block = m.y[(m.d == 0) .* (block_labels == block_label)]
+    	yt_block = m.y[(m.d .== 1) .* (block_labels .== block_label)]
+    	yc_block = m.y[(m.d .== 0) .* (block_labels .== block_label)]
     	# sample sizes in the block
     	nt_block = length(yt_block)
     	nc_block = length(yc_block)
