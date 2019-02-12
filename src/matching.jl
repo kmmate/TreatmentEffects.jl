@@ -33,9 +33,6 @@ ate_matchingestimator(mam, k=2, matching_method=:covariates)
 ```
 """
 function ate_matchingestimator(m::MatchingModel; k::Int64 = 1, matching_method::Symbol = :propscore_logit)
-	if matching_method == :propscore_nonparametric
-		error("nonparametric propensity score estimation is not implemented")
-	end
 	# separate treatment and control group
 	n = size(m.y)[1]  # sample size
     n_t = Int(sum(m.d))  # no. of treated units
@@ -57,7 +54,10 @@ function ate_matchingestimator(m::MatchingModel; k::Int64 = 1, matching_method::
     	if matching_method == :propscore_logit
     		phat = predict_propscore(m.d, m.x, :logit)
     	elseif matching_method == :propscore_nonparametric
-    		phat = predict_propscore(m.d, m.x, :nonparametric)
+    		error("nonparametric propensity score estimation is not implemented")
+    		#phat = predict_propscore(m.d, m.x, :nonparametric)
+    	else
+    		error("`propscore_estimation` mumst be either :logit or :nonparametric")
     	end
     	phat_t = phat[m.d .== 1]  # propensity score in treatment group
     	phat_c = phat[m.d .== 0]  # propensity score in control group
@@ -105,9 +105,6 @@ att_matchingestimator(mam, k=2, matching_method=:covariates)
 ```
 """
 function att_matchingestimator(m::MatchingModel; k::Int64 = 1, matching_method::Symbol = :propscore_logit)
-	if matching_method == :propscore_nonparametric
-		error("nonparametric propensity score estimation is not implemented")
-	end
 	# separate treatment and control group
 	n = size(m.y)[1]  # sample size
     n_t = Int(sum(m.d))  # no. of treated units
@@ -129,7 +126,10 @@ function att_matchingestimator(m::MatchingModel; k::Int64 = 1, matching_method::
     	if matching_method == :propscore_logit
     		phat = predict_propscore(m.d, m.x, :logit)
     	elseif matching_method == :propscore_nonparametric
-    		phat = predict_propscore(m.d, m.x, :nonparametric)
+    		error("nonparametric propensity score estimation is not implemented")
+    		#phat = predict_propscore(m.d, m.x, :nonparametric)
+    	else
+    		error("`propscore_estimation` mumst be either :logit or :nonparametric")
     	end
     	phat_t = phat[m.d .== 1]  # propensity score in treatment group
     	phat_c = phat[m.d .== 0]  # propensity score in control group
@@ -145,6 +145,72 @@ function att_matchingestimator(m::MatchingModel; k::Int64 = 1, matching_method::
     # compute the ATT estimator: 1/n_t * sum_{i in treated}(Yhat_i(1)-Yhat_i(0))
     att_hat = 1 / n_t * sum(y_t - yc_hat) 
     return att_hat
+end
+
+
+"""
+    function ate_blockingestimator(m::MatchingModel; propscore_estimation::Symbol=:logit,
+	block_boundaries::Array{Float64, 1}=[0.2, 0.4, 0.6, 0.8])
+
+Estimate Average Treatment Effect (ATE) with blocking on propensity score.
+
+Note: blocking estimation as also known as stratification.
+
+##### Arguments
+- `m`::MatchingModel : MatchingModel model type
+- `propscore_estimation`::Symbol : Estimator used to estimate the propensity score.
+	Either :logit or :nonparametric.
+- `block_boundaries`::Array{Float64, 1} : Boundaries of estimated propensity score
+	used to create strata/blocks. `length(block_boundaries)` = number of blocks + 1.
+	Elements must be in increasing order, with each element between 0 and 1.
+	Must incluide 0 and 1 as endpoints.
+
+##### Returns
+- `ate_hat`::Float64 : Estimated ATE
+
+##### Examples
+```julia
+using TreatmentEffects, CSV
+y = Array(CSV.read("y_data.csv")[:1])  # [:1] to get Array{T, 1}
+d = Array(CSV.read("d_data.csv")[:1])
+x = Array(convert(Matrix, CSV.read("x_data.csv")))
+mam = MatchingModel(y, d, x)
+ate_blockingestimator(mam)
+```
+"""
+function ate_blockingestimator(m::MatchingModel; propscore_estimation::Symbol=:logit,
+	block_boundaries::Array{Float64, 1}=[0., 0.2, 0.4, 0.6, 0.8, 1.])
+	n = size(m.y)[1]  # sample size
+	n_blocks = length(block_boundaries) - 1
+	if propscore_estimation == :logit
+		phat = predict_propscore(m.d, m.x, :logit)
+	elseif propscore_estimation == :nonparametric
+		error("nonparametric propensity score estimation is not implemented")
+		#phat = predict_propscore(m.d, m.x, :nonparametric)
+	else
+		error("`propscore_estimation` mumst be either :logit or :nonparametric")
+	end
+	# divide the observations into blocks based on propensity score estimates
+	block_labeller(p::Float64) = [i for i in 1:n_blocks if
+		block_boundaries[i] <= p <= block_boundaries[i+1]][1]
+	block_labels = map(block_labeller, phat)
+    atehat_blocks = zeros(n_blocks)
+    samplesize_blocks = zeros(n_blocks)
+    # estimate ATE in each block
+    for block_label in 1:n_blocks
+    	# treatment and control outcomes in the block
+    	yt_block = m.y[(m.d == 1) .* (block_labels == block_label)]
+    	yc_block = m.y[(m.d == 0) .* (block_labels == block_label)]
+    	# sample sizes in the block
+    	nt_block = length(yt_block)
+    	nc_block = length(yc_block)
+    	n_block = nt_block + nc_block
+    	atehat_blocks[block_label] = sum(yt_block) / nt_block - sum(yc_block) / nc_block
+    	samplesize_blocks[block_label] = n_block
+    end
+    # estimate ATE from block estimates
+    ate_hat = (atehat_blocks' * samplesize_blocks) / n
+    return ate_hat
 end
 
 #=
