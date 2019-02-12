@@ -145,7 +145,8 @@ function att_matchingestimator(m::MatchingModel; k::Int64 = 1, matching_method::
     # estimate a control outcome, Y(0), for each treated unit with matching
     yc_hat = zeros(n_t)
     for treated_unit in 1:n_t
-        yc_hat[treated_unit] = estimate_counterfactual(k, distance_matrix[treated_unit, :], y_c)
+        @inbounds yc_hat[treated_unit] = estimate_counterfactual(k,
+        	distance_matrix[treated_unit, :], y_c)
     end
     # compute the ATT estimator: 1/n_t * sum_{i in treated}(Yhat_i(1)-Yhat_i(0))
     att_hat = 1 / n_t * sum(y_t - yc_hat) 
