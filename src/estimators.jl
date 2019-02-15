@@ -88,7 +88,7 @@ function nonparametric_predict(d::Array{<:Real, 1},
 	end
 	# unpack options
 	kernel = np_options[:kernel]
-	polorder =  np_options[:poldegree]
+	poldegree =  np_options[:poldegree]
 	bandwidth_input = np_options[:bandwidth]
 	if bandwidth_input == :optimal
 		bandwidth = n ^ (- 1 / (2 * poldegree + k + 2))  # AMISE minimiser bandwidth
