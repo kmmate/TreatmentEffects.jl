@@ -13,6 +13,14 @@ TODO:
 using StatsBase, Distances
 
 """
+    ate_matchingestimator(m::MatchingModel;
+							   k::Int64 = 1,
+							   matching_method::Symbol = :propscore_logit,
+							   np_options::Dict = Dict(:kernel => triangular_kernel,
+							   						   :bandwidth => :optimal,
+							   						   :poldegree => 2)
+							   )
+
 
 Estimate Average Treatment Effect (ATE) with k-nearest neighbour matching.
 
@@ -44,7 +52,7 @@ function ate_matchingestimator(m::MatchingModel;
 							   k::Int64 = 1,
 							   matching_method::Symbol = :propscore_logit,
 							   np_options::Dict = Dict(:kernel => triangular_kernel,
-							   						   :bandwidth => :optimal
+							   						   :bandwidth => :optimal,
 							   						   :poldegree => 2)
 							   )
 	# separate treatment and control group
@@ -98,11 +106,11 @@ end
 
 """
     att_matchingestimator(m::MatchingModel;
-							   k::Int64 = 1,
-							   matching_method::Symbol = :propscore_logit,
-							   np_options::Dict = Dict(:kernel => triangular_kernel,
-							   						   :bandwidth => :optimal
-							   						   :poldegree => 2)
+						  k::Int64 = 1,
+						  matching_method::Symbol = :propscore_logit,
+						  np_options::Dict = Dict(:kernel => triangular_kernel,
+						  						  :bandwidth => :optimal,
+						 						  :poldegree => 2)
 							   )
 
 Estimate Average Treatment Effect (ATT) with k-nearest neighbour matching.
@@ -135,7 +143,7 @@ function att_matchingestimator(m::MatchingModel;
 							   k::Int64 = 1,
 							   matching_method::Symbol = :propscore_logit,
 							   np_options::Dict = Dict(:kernel => triangular_kernel,
-							   						   :bandwidth => :optimal
+							   						   :bandwidth => :optimal,
 							   						   :poldegree => 2)
 							   )
 	# separate treatment and control group
@@ -186,7 +194,7 @@ end
 					      propscore_estimation::Symbol=:logit,
 						  block_boundaries::Array{Float64, 1}=[0., 0.2, 0.4, 0.6, 0.8, 1.],
 						  np_options::Dict = Dict(:kernel => triangular_kernel,
-						   					      :bandwidth => :optimal
+						   					      :bandwidth => :optimal,
 							   					  :poldegree => 2))
 
 Estimate Average Treatment Effect (ATE) with blocking on propensity score.
@@ -224,7 +232,7 @@ function ate_blockingestimator(m::MatchingModel;
 							   propscore_estimation::Symbol=:logit,
 							   block_boundaries::Array{Float64, 1}=[0., 0.2, 0.4, 0.6, 0.8, 1.],
 							   np_options::Dict = Dict(:kernel => triangular_kernel,
-							   						   :bandwidth => :optimal
+							   						   :bandwidth => :optimal,
 							   						   :poldegree => 2))
 	# checks
 	if block_boundaries[1] != 0
