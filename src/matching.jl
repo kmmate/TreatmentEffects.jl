@@ -18,9 +18,14 @@ Estimate Average Treatment Effect (ATE) with k-nearest neighbour matching.
 
 ##### Arguments
 - `m`::MatchingModel : MatchingModel model type
+- `k`::Int64 : Number of nearest neighbours
 - `matching_method`::Symbol : Method used for matching,
 	one of :propscore_logit, :propscore_nonparametric, :covariates
-- `k`::Int64 : Number of nearest neighbours
+- `np_options`::Dict : Nonparametric propensity score estimation options,
+	Dict(:kernel => triangular_kernel, :bandwidth => :optimal, :poldegree => 2),
+	where :kernel is function in `kernels.jl`, :bandwidth is either :optimal
+	for AMISE optimal bandwidth or a Float64,  :poldegree is Int64, 
+	the polynomial degree in the local polynomial regression
 
 ##### Returns
 - `ate_hat`::Float64 : Estimated ATE
@@ -35,7 +40,13 @@ mam = MatchingModel(y, d, x)
 ate_matchingestimator(mam, k=2, matching_method=:covariates)
 ```
 """
-function ate_matchingestimator(m::MatchingModel; k::Int64 = 1, matching_method::Symbol = :propscore_logit)
+function ate_matchingestimator(m::MatchingModel;
+							   k::Int64 = 1,
+							   matching_method::Symbol = :propscore_logit,
+							   np_options::Dict = Dict(:kernel => triangular_kernel,
+							   						   :bandwidth => :optimal
+							   						   :poldegree => 2)
+							   )
 	# separate treatment and control group
 	n = size(m.y)[1]  # sample size
     n_t = Int(sum(m.d))  # no. of treated units
@@ -57,8 +68,7 @@ function ate_matchingestimator(m::MatchingModel; k::Int64 = 1, matching_method::
     	if matching_method == :propscore_logit
     		phat = predict_propscore(m.d, m.x, :logit)
     	elseif matching_method == :propscore_nonparametric
-    		error("nonparametric propensity score estimation is not implemented")
-    		#phat = predict_propscore(m.d, m.x, :nonparametric)
+    		phat = predict_propscore(m.d, m.x, :nonparametric, np_options=np_options)
     	else
     		error("`propscore_estimation` mumst be either :logit or :nonparametric")
     	end
@@ -87,6 +97,13 @@ end
 
 
 """
+    att_matchingestimator(m::MatchingModel;
+							   k::Int64 = 1,
+							   matching_method::Symbol = :propscore_logit,
+							   np_options::Dict = Dict(:kernel => triangular_kernel,
+							   						   :bandwidth => :optimal
+							   						   :poldegree => 2)
+							   )
 
 Estimate Average Treatment Effect (ATT) with k-nearest neighbour matching.
 
@@ -95,6 +112,11 @@ Estimate Average Treatment Effect (ATT) with k-nearest neighbour matching.
 - `matching_method`::Symbol : Method used for matching,
 	one of :propscore_logit, :propscore_nonparametric, :covariates
 - `k`::Int64 : Number of nearest neighbours
+- `np_options`::Dict : Nonparametric propensity score estimation options,
+	Dict(:kernel => triangular_kernel, :bandwidth => :optimal, :poldegree => 2),
+	where :kernel is function in `kernels.jl`, :bandwidth is either :optimal
+	for AMISE optimal bandwidth or a Float64,  :poldegree is Int64, 
+	the polynomial degree in the local polynomial regression
 
 ##### Returns
 - `att_hat`::Float64 : Estimated ATE
@@ -109,7 +131,13 @@ mam = MatchingModel(y, d, x)
 att_matchingestimator(mam, k=2, matching_method=:covariates)
 ```
 """
-function att_matchingestimator(m::MatchingModel; k::Int64 = 1, matching_method::Symbol = :propscore_logit)
+function att_matchingestimator(m::MatchingModel;
+							   k::Int64 = 1,
+							   matching_method::Symbol = :propscore_logit,
+							   np_options::Dict = Dict(:kernel => triangular_kernel,
+							   						   :bandwidth => :optimal
+							   						   :poldegree => 2)
+							   )
 	# separate treatment and control group
 	n = size(m.y)[1]  # sample size
     n_t = Int(sum(m.d))  # no. of treated units
@@ -131,8 +159,7 @@ function att_matchingestimator(m::MatchingModel; k::Int64 = 1, matching_method::
     	if matching_method == :propscore_logit
     		phat = predict_propscore(m.d, m.x, :logit)
     	elseif matching_method == :propscore_nonparametric
-    		error("nonparametric propensity score estimation is not implemented")
-    		#phat = predict_propscore(m.d, m.x, :nonparametric)
+    		phat = predict_propscore(m.d, m.x, :nonparametric, np_options=np_options)
     	else
     		error("`propscore_estimation` mumst be either :logit or :nonparametric")
     	end
@@ -155,8 +182,12 @@ end
 
 
 """
-    function ate_blockingestimator(m::MatchingModel; propscore_estimation::Symbol=:logit,
-	block_boundaries::Array{Float64, 1}=[0.2, 0.4, 0.6, 0.8])
+    ate_blockingestimator(m::MatchingModel;
+					      propscore_estimation::Symbol=:logit,
+						  block_boundaries::Array{Float64, 1}=[0., 0.2, 0.4, 0.6, 0.8, 1.],
+						  np_options::Dict = Dict(:kernel => triangular_kernel,
+						   					      :bandwidth => :optimal
+							   					  :poldegree => 2))
 
 Estimate Average Treatment Effect (ATE) with blocking on propensity score.
 
@@ -170,6 +201,11 @@ Note: blocking estimation as also known as stratification.
 	used to create strata/blocks. `length(block_boundaries)` = number of blocks + 1.
 	Elements must be in increasing order, with each element between 0 and 1.
 	Must incluide 0 and 1 as endpoints.
+- `np_options`::Dict : Nonparametric propensity score estimation options,
+	Dict(:kernel => triangular_kernel, :bandwidth => :optimal, :poldegree => 2),
+	where :kernel is function in `kernels.jl`, :bandwidth is either :optimal
+	for AMISE optimal bandwidth or a Float64,  :poldegree is Int64, 
+	the polynomial degree in the local polynomial regression
 
 ##### Returns
 - `ate_hat`::Float64 : Estimated ATE
@@ -184,8 +220,12 @@ mam = MatchingModel(y, d, x)
 ate_blockingestimator(mam)
 ```
 """
-function ate_blockingestimator(m::MatchingModel; propscore_estimation::Symbol=:logit,
-	block_boundaries::Array{Float64, 1}=[0., 0.2, 0.4, 0.6, 0.8, 1.])
+function ate_blockingestimator(m::MatchingModel;
+							   propscore_estimation::Symbol=:logit,
+							   block_boundaries::Array{Float64, 1}=[0., 0.2, 0.4, 0.6, 0.8, 1.],
+							   np_options::Dict = Dict(:kernel => triangular_kernel,
+							   						   :bandwidth => :optimal
+							   						   :poldegree => 2))
 	# checks
 	if block_boundaries[1] != 0
 		error("`block_boundaries` must contain 0 as its first element")
@@ -202,8 +242,7 @@ function ate_blockingestimator(m::MatchingModel; propscore_estimation::Symbol=:l
 	if propscore_estimation == :logit
 		phat = predict_propscore(m.d, m.x, :logit)
 	elseif propscore_estimation == :nonparametric
-		error("nonparametric propensity score estimation is not implemented")
-		#phat = predict_propscore(m.d, m.x, :nonparametric)
+		phat = predict_propscore(m.d, m.x, :nonparametric, np_options=np_options)
 	else
 		error("`propscore_estimation` mumst be either :logit or :nonparametric")
 	end

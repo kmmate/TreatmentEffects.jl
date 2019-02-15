@@ -22,9 +22,12 @@ Predict propensity score based on estimation as specified by `estimation_method`
 ##### Returns
 - `pscore_hat`::Array{Float64, 1} : Predicted propensity score
 """
-function predict_propscore(d::Array{<:Real, 1}, x::Array{<:Real}, estimation_method::Symbol)
+function predict_propscore(d::Array{<:Real, 1},
+						   x::Array{<:Real},
+						   estimation_method::Symbol;
+						   np_options::Dict = Dict())
 	if in(estimation_method, [:logit, :nonparametric]) == false
-		error("`estimation_method` must be either :logistic or :nonparametric")
+		error("`estimation_method` must be either :logit or :nonparametric")
 	# logit
 	elseif estimation_method == :logit
 		df_d = DataFrame(d[:, :], [:d])
@@ -35,8 +38,7 @@ function predict_propscore(d::Array{<:Real, 1}, x::Array{<:Real}, estimation_met
 		return pscore_hat
 	# nonparametric
 	elseif estimation_method == :nonparametric
-		error("nonparametric propensity score estimation is not implemented")
-		pscore_hat = nonparametric_predict(d, x)
+		pscore_hat = nonparametric_predict(d, x, np_options)
 		return pscore_hat
 	end
 end
@@ -74,6 +76,38 @@ Nonparametric auxiliary estimators for internal use
 """
 Predict the propensity score P(D=1|X) with nonparametric regression.
 """
-function nonparametric_predict()
-
+function nonparametric_predict(d::Array{<:Real, 1},
+						   	   x::Array{<:Real},
+						   	   np_options::Dict)
+	n = length(d)
+	dim = ndims(x)
+	if dim == 1
+		k = 1
+	elseif dim == 2
+		k = size(x)[2]  # number of regressors
+	end
+	# unpack options
+	kernel = np_options[:kernel]
+	polorder =  np_options[:poldegree]
+	bandwidth_input = np_options[:bandwidth]
+	if bandwidth_input == :optimal
+		bandwidth = n ^ (- 1 / (2 * poldegree + k + 2))  # AMISE minimiser bandwidth
+	else
+		bandwidth = bandwidth_input
+	end
+	# predict phat
+	phat = zeros(n)
+	if k == 1  # scalar x
+		for i in 1:n
+			@inbounds phat[i] = localpoly_regression(x[i], d, x, bandwidth,
+				poldegree=poldegree, kernel=kernel)
+		end
+	else  # multivariate x
+		x_t = Array(x')  # for faster loop
+		for i in 1:n
+			@inbounds phat[i] = localpoly_regression(x_t[:, i], d, x, bandwidth,
+				poldegree=poldegree, kernel=kernel)
+		end
+	end
+	return phat
 end

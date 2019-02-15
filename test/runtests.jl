@@ -15,6 +15,8 @@ using TreatmentEffects,
 	  CSV,
 	  DataFrames
 
+#include("..\\src\\TreatmentEffects.jl")
+
 tests = [#"test_exogenous_participation.jl",
 		 #"test_data_cleaning.jl",
 		 "test_matching.jl",
