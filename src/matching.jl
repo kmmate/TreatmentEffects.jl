@@ -7,16 +7,15 @@ Defines methods (estimators) for MatchingModel <: CIAModel type.
 
 TODO:
 	- bias correction for matching estimator
-	- nonparametric propensity score matching
 =#
 
 using StatsBase, Distances
 
 """
     ate_matchingestimator(m::MatchingModel;
-							   k::Int64 = 1,
-							   matching_method::Symbol = :propscore_logit,
-							   np_options::Dict = Dict(:kernel => triangular_kernel,
+						  k::Int64 = 1,
+						  matching_method::Symbol = :propscore_logit,
+						  np_options::Dict = Dict(:kernel => gaussian_kernel,
 							   						   :bandwidth => :optimal,
 							   						   :poldegree => 2)
 							   )
@@ -35,6 +34,13 @@ Estimate Average Treatment Effect (ATE) with k-nearest neighbour matching.
 	for AMISE optimal bandwidth or a Float64,  :poldegree is Int64, 
 	the polynomial degree in the local polynomial regression
 
+!!! warning
+
+In nonparametric propensity score estimation, bounded support kernels 
+(`triangular_kernel`, `uniform_kernel`) often lead to zero kernel weights
+and hence singular matrix when estimating propensity score with WLS.
+Use `gaussian_kernel` or `epanechnikov_kernel` instead.
+
 ##### Returns
 - `ate_hat`::Float64 : Estimated ATE
 
@@ -51,7 +57,7 @@ ate_matchingestimator(mam, k=2, matching_method=:covariates)
 function ate_matchingestimator(m::MatchingModel;
 							   k::Int64 = 1,
 							   matching_method::Symbol = :propscore_logit,
-							   np_options::Dict = Dict(:kernel => triangular_kernel,
+							   np_options::Dict = Dict(:kernel => gaussian_kernel,
 							   						   :bandwidth => :optimal,
 							   						   :poldegree => 2)
 							   )
@@ -108,7 +114,7 @@ end
     att_matchingestimator(m::MatchingModel;
 						  k::Int64 = 1,
 						  matching_method::Symbol = :propscore_logit,
-						  np_options::Dict = Dict(:kernel => triangular_kernel,
+						  np_options::Dict = Dict(:kernel => gaussian_kernel,
 						  						  :bandwidth => :optimal,
 						 						  :poldegree => 2)
 							   )
@@ -126,6 +132,13 @@ Estimate Average Treatment Effect (ATT) with k-nearest neighbour matching.
 	for AMISE optimal bandwidth or a Float64,  :poldegree is Int64, 
 	the polynomial degree in the local polynomial regression
 
+!!! warning
+
+In nonparametric propensity score estimation, bounded support kernels 
+(`triangular_kernel`, `uniform_kernel`) often lead to zero kernel weights
+and hence singular matrix when estimating propensity score with WLS.
+Use `gaussian_kernel` or `epanechnikov_kernel` instead.
+
 ##### Returns
 - `att_hat`::Float64 : Estimated ATE
 
@@ -142,7 +155,7 @@ att_matchingestimator(mam, k=2, matching_method=:covariates)
 function att_matchingestimator(m::MatchingModel;
 							   k::Int64 = 1,
 							   matching_method::Symbol = :propscore_logit,
-							   np_options::Dict = Dict(:kernel => triangular_kernel,
+							   np_options::Dict = Dict(:kernel => gaussian_kernel,
 							   						   :bandwidth => :optimal,
 							   						   :poldegree => 2)
 							   )
@@ -193,7 +206,7 @@ end
     ate_blockingestimator(m::MatchingModel;
 					      propscore_estimation::Symbol=:logit,
 						  block_boundaries::Array{Float64, 1}=[0., 0.2, 0.4, 0.6, 0.8, 1.],
-						  np_options::Dict = Dict(:kernel => triangular_kernel,
+						  np_options::Dict = Dict(:kernel => gaussian_kernel,
 						   					      :bandwidth => :optimal,
 							   					  :poldegree => 2))
 
@@ -215,6 +228,14 @@ Note: blocking estimation as also known as stratification.
 	for AMISE optimal bandwidth or a Float64,  :poldegree is Int64, 
 	the polynomial degree in the local polynomial regression
 
+
+!!! warning
+
+In nonparametric propensity score estimation, bounded support kernels 
+(`triangular_kernel`, `uniform_kernel`) often lead to zero kernel weights
+and hence singular matrix when estimating propensity score with WLS.
+Use `gaussian_kernel` or `epanechnikov_kernel` instead.
+
 ##### Returns
 - `ate_hat`::Float64 : Estimated ATE
 
@@ -231,7 +252,7 @@ ate_blockingestimator(mam)
 function ate_blockingestimator(m::MatchingModel;
 							   propscore_estimation::Symbol=:logit,
 							   block_boundaries::Array{Float64, 1}=[0., 0.2, 0.4, 0.6, 0.8, 1.],
-							   np_options::Dict = Dict(:kernel => triangular_kernel,
+							   np_options::Dict = Dict(:kernel => gaussian_kernel,
 							   						   :bandwidth => :optimal,
 							   						   :poldegree => 2))
 	# checks
@@ -251,6 +272,7 @@ function ate_blockingestimator(m::MatchingModel;
 		phat = predict_propscore(m.d, m.x, :logit)
 	elseif propscore_estimation == :nonparametric
 		phat = predict_propscore(m.d, m.x, :nonparametric, np_options=np_options)
+		println(phat)
 	else
 		error("`propscore_estimation` mumst be either :logit or :nonparametric")
 	end
