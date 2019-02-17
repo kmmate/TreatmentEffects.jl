@@ -272,7 +272,6 @@ function ate_blockingestimator(m::MatchingModel;
 		phat = predict_propscore(m.d, m.x, :logit)
 	elseif propscore_estimation == :nonparametric
 		phat = predict_propscore(m.d, m.x, :nonparametric, np_options=np_options)
-		println(phat)
 	else
 		error("`propscore_estimation` mumst be either :logit or :nonparametric")
 	end
