@@ -276,8 +276,8 @@ function ate_blockingestimator(m::MatchingModel;
 		error("`propscore_estimation` mumst be either :logit or :nonparametric")
 	end
 	# censor extreme values
-	phat[phat .< 0] = 0.
-	phat[phat .> 1] = 1.
+	phat[phat .< 0] = 0. .* ones(sum(phat .< 0))
+	phat[phat .> 1] = 1. .* ones(sum(phat .> 1))
 	# divide the observations into blocks based on propensity score estimates
 	block_labeller(p::Float64) = [i for i in 1:n_blocks if
 		block_boundaries[i] <= p <= block_boundaries[i+1]][1]
