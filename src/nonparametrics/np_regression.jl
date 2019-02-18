@@ -5,16 +5,21 @@
 
 Define functions for nonparametric regression.
 
+TODO:
+	- profile the code
+	- expand polynomial_features so that poldegree can be larger than no. of variables
+	- bounded support kernels (triangular_kernel, uniform_kernel) often lead
+	  to zero kernel weights and hence singular matrix when computing mhat with WLS
 =#
 using IterTools
 #include("kernels.jl")
 """
     function localpoly_regression(x0::T where T<:Union{<:Real, Array{<:Real, 1}},
-							  y::Array{<:Real, 1},
-							  x::Array{<:Real},
-							  bandwidth::Float64;
-							  poldegree::Int64 = 2,
-							  kernel::Function = triangular_kernel)
+							  	  y::Array{<:Real, 1},
+							      x::Array{<:Real},
+							      bandwidth::Float64;
+							      poldegree::Int64 = 2,
+							      kernel::Function = triangular_kernel)
 
 Local polynomial regression estimator.
 Estimates the conditional expected value ``m(x)=E[y|X=x]``.
@@ -95,6 +100,7 @@ function localpoly_regression(x0::T where T<:Union{<:Real, Array{<:Real, 1}},
 		product_kernel(v::Array{<:Real}) = prod([kernel(i, kernelorder=kernelorder) for i in v])
 		w = [product_kernel(u_transpose[:, col]) ^ 0.5 for col in 1:n]
 	end
+	println("typeof(w) = ", typeof(w))
 
 	# transform variables, compute mhat with WLS
 	designmatrix_w = designmatrix .* w
@@ -111,9 +117,23 @@ end
 =#
 
 """
-	Creates polynomial features from the data in `x`, including intercept and interactions
+    polynomial_features(x::Array{<:Real}, poldegree::Int64)
+
+Creates polynomial features from the data in `x`, including intercept and interactions
 
 Based on [ScikitLearn.Preprocessing](https://github.com/cstjean/ScikitLearn.jl/blob/master/src/preprocessing.jl).
+
+##### Arguments
+-`x`:Array{<:Real} : Data array. Either ``n``-long Array{<:Real, 1} or ``n``-by-``d``
+	Array{<:Real, 2} where ``d`` is the number of variables,
+	``n`` is the number of observations
+- `poldegree`::Int64 : Highest degree of the polynomial to be created.
+	Must be smaller or equal to the number of variables in `x`.
+	For eg. `poldegree`=2 will include seconds order interactions and squres, 
+	the main effects and an intercept.
+
+##### Returns
+- `x_out`::Array{<:Real, 2} : Data array with the added polynomial feaures
 """
 function polynomial_features(x::Array{<:Real}, poldegree::Int64)
 	# sizes, checks
