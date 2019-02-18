@@ -100,7 +100,6 @@ function localpoly_regression(x0::T where T<:Union{<:Real, Array{<:Real, 1}},
 		product_kernel(v::Array{<:Real}) = prod([kernel(i, kernelorder=kernelorder) for i in v])
 		w = [product_kernel(u_transpose[:, col]) ^ 0.5 for col in 1:n]
 	end
-	println("typeof(w) = ", typeof(w))
 
 	# transform variables, compute mhat with WLS
 	designmatrix_w = designmatrix .* w
