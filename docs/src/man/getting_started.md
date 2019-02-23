@@ -29,7 +29,7 @@ indicate abstract types.
 			By no self selection into treatment, we mean that participation in the treatment is
 			independent from the potential outcomes. Formally ``[Y_i(0), Y_i(1)]`` independent of ``D_i``.
 
-			Implemented methods: [`ate_estimator`](@ref), [`bootstrap_distribution`](@ref), [`bootstrap_test`](@ref)
+			Implemented methods: [`ate_estimator`](@ref), [`bootstrap_distribution`](@ref), [`bootstrap_htest`](@ref)
 
 			!!! warning
 
@@ -38,7 +38,7 @@ indicate abstract types.
 
 		* If **CIA** (conditional independence, i.e. unconfundedness) holds: [`CIAModel`](@ref)
 
-			By CIA we mean that conditional on a set of pre-treatment covariate(s) ``x``, the treatment
+			By CIA we mean that conditional on a set of *pre-treatment* covariate(s) ``x``, the treatment
 			is as good as random. Formally, given ``x_i`` ``[Y_i(0), Y_i(1)]`` is independent of ``D_i``.
 
 			* If **cut-off based treatment participation rule** : [`RDDModel`](@ref)
@@ -52,7 +52,8 @@ indicate abstract types.
 
 				The most general case of `CIAModel`, which is not an `RDDModel`.
 
-				Implemented methods: 
+				Implemented methods: [`ate_matchingestimator`](@ref), [`att_matchingestimator`](@ref),
+									 [`ate_blockingestimator`](@ref)
 
 	* Else **Randomised Control Trial data**: [`RCTModel`](@ref)
 
@@ -62,15 +63,15 @@ indicate abstract types.
 
 		* If **all units perfectly comply with their assignment**: [`PerfectComplianceModel`](@ref)
 		
-		* Else **some units do not comply with their treatment assigment**: [`ImperfectComplianceModel`](@ref)
+		* Else **some units do not comply with their treatment assignment**: [`ImperfectComplianceModel`](@ref)
 			
-			* If **non-compliance with assigment is exogenous**: [`ExogenousNoncomplianceModel`](@ref)
+			* If **non-compliance with assignment is exogenous**: [`ExogenousNoncomplianceModel`](@ref)
 
 			!!! warning
 
 			Usage not recommended because of strict assumptions.
 
-			* Else **non-compliance with assigment is endogenous**: [`EndogenousNoncomplianceModel`](@ref)
+			* Else **non-compliance with assignment is endogenous**: [`EndogenousNoncomplianceModel`](@ref)
 
 				Implemented methods:
 
@@ -78,4 +79,4 @@ indicate abstract types.
 
 	Rubin Causal models where SUTVA is violated have just been gaining ground recently.
 	Here the experimental data based instrumental variable estimator is implemented
-	for paired interference, based on Kormos(2019). 
+	for paired interference, based on Kormos and Lieli(2019). 

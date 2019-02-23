@@ -3,16 +3,18 @@
 @author: Mate Kormos
 @date: 12-Feb-2019
 
-Define functions for nonparametric regression.
+Define functions for nonparametric regression. 
+
 
 TODO:
 	- profile the code
-	- expand polynomial_features so that poldegree can be larger than no. of variables
-	- bounded support kernels (triangular_kernel, uniform_kernel) often lead
+
+REMARKS:
+	- bounded support kernels (triangular_kernel, uniform_kernel) may lead
 	  to zero kernel weights and hence singular matrix when computing mhat with WLS
 =#
 using IterTools
-#include("kernels.jl")
+
 """
     function localpoly_regression(x0::T where T<:Union{<:Real, Array{<:Real, 1}},
 							  	  y::Array{<:Real, 1},

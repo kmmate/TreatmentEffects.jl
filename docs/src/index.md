@@ -18,7 +18,6 @@ The type hierarchy provides a guidance on choosing the right model. See Getting 
 * Instrumental variables under violated stable unit treatment value assumption (SUTVA)
 
 ## Package Manual
-
 ```@contents
 Pages = ["man/getting_started.md"]
 Depth = 2

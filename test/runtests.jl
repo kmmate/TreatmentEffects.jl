@@ -4,7 +4,7 @@ Test for TreatmentEffects.jl
 @author: Mate Kormos
 @date: 18-Jan-2019
 
-include("C:\\Users\\Máté\\Dropbox\\tinbergen\\TreatmentEffects.jl\\test\\runtests.jl")
+
 =#
 using TreatmentEffects,
 	  Test,
@@ -14,8 +14,6 @@ using TreatmentEffects,
 	  SharedArrays,
 	  CSV,
 	  DataFrames
-
-#include("..\\src\\TreatmentEffects.jl")
 
 tests = [#"test_exogenous_participation.jl",
 		 #"test_data_cleaning.jl",

@@ -10,3 +10,25 @@ ate_estimator
 bootstrap_distribution
 bootstrap_htest
 ```
+
+## MatchingModel
+```@docs
+ate_matchingestimator
+att_matchingestimator
+ate_blockingestimator
+```
+
+## Nonparametric regression
+```@docs
+localpoly_regression
+polynomial_features
+uniform_kernel
+triangular_kernel
+gaussian_kernel
+epanechnikov_kernel
+```
+
+## Other estimators
+```@docs
+predict_propscore
+```

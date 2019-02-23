@@ -18,6 +18,11 @@ Predict propensity score based on estimation as specified by `estimation_method`
 - `d`::Array{<:Real, 1} : Binary outcome variable
 - `x`::Array{<:Real} : Covariates
 - `estimation_method`::Symbol : :logit or :nonparametric
+- `np_options`::Dict : Nonparametric propensity score estimation options,
+	Dict(:kernel => triangular_kernel, :bandwidth => :optimal, :poldegree => 2),
+	where :kernel is function in `kernels.jl`, :bandwidth is either :optimal
+	for AMISE optimal bandwidth or a Float64,  :poldegree is Int64, 
+	the polynomial degree in the local polynomial regression
 
 ##### Returns
 - `pscore_hat`::Array{Float64, 1} : Predicted propensity score

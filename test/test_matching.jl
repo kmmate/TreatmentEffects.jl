@@ -1,10 +1,6 @@
 #=
 Tests for matching.jl
 
-
-Remarks
--------
-
 =#
 
 
@@ -29,9 +25,8 @@ Remarks
 	numberof_neighbours = 2
 	matching_method = :covariates
 	ate_hat = ate_matchingestimator(mam, k=numberof_neighbours, matching_method=matching_method)
-	println("ATE_hat $(matching_method) matching =  ", ate_hat)
 	@test isapprox(ate_hat, -200, atol=50) == true
-	#	---	test mathcing on covariates
+	#	---	test mathcing on propensity score
 	numberof_neighbours = 3
 	matching_method = :propscore_logit
 	ate_hat = ate_matchingestimator(mam, k=numberof_neighbours, matching_method=matching_method)
@@ -40,10 +35,10 @@ Remarks
 	# ============== Testing with Monte Carlo
 
 	# DGP parameters
-	n = 2000
+	n = 250
 	mu_0 = 3.
 	mu_1 = 5.  # will imply ATE = 2.
-	sigma_x1 = 0.9
+	sigma_x1 = 0.8
 	sigma_x2 = 0.7
 	rho = 0.
 	covar = rho * sigma_x1 * sigma_x2
@@ -55,24 +50,27 @@ Remarks
 	gen_y1(x1::Array{Float64}, x2::Array{Float64}) = mu_1 .+ 3.1 * x1 .+ 1.8 * x2 .+
 		1.1 * randn(length(x1))
 	gen_d(x1::Array{Float64}, x2::Array{Float64}) =  Int.(1.3 * x1 .+ 5 * x2 .>= randn(length(x1)))
+	np_options = Dict(:bandwidth => :optimal, :kernel => gaussian_kernel, :poldegree => 2)
 
 	# monte carlo
-	mc_reps = 1000
-	atehat_sum = @distributed (+) for rep in 1:mc_reps
-		# generate data
-		x = gen_x(n)
-		d = gen_d(x[1, :], x[2, :])
-		y1 = gen_y1(x[1, :], x[2, :])
-		y0 = gen_y0(x[1, :], x[2, :])
-		y = @. d * y1 + (1 - d) * y0
-		# set up model
-		mam = MatchingModel(y, d, Array(x'))
-		#	---	test mathcing on covariates
-		numberof_neighbours = 1
-		matching_method = :covariates
-		ate_matchingestimator(mam, k=numberof_neighbours, matching_method=matching_method)
+	mc_reps = 500
+	for matching_method in [:covariates, :propscore_logit, :propscore_nonparametric]
+		atehat_sum = @distributed (+) for rep in 1:mc_reps
+			# generate data
+			x = gen_x(n)
+			d = gen_d(x[1, :], x[2, :])
+			y1 = gen_y1(x[1, :], x[2, :])
+			y0 = gen_y0(x[1, :], x[2, :])
+			y = @. d * y1 + (1 - d) * y0
+			# set up model
+			mam = MatchingModel(y, d, Array(x'))
+			#	---	test mathcing on covariates
+			numberof_neighbours = 1
+			ate_matchingestimator(mam, k=numberof_neighbours,
+				matching_method=matching_method, np_options=np_options)
+		end
+		@test isapprox(atehat_sum / mc_reps, mu_1 - mu_0, atol=1.) == true
 	end
-	@test isapprox(atehat_sum / mc_reps, mu_1 - mu_0, atol=1.) == true
 end
 
 
@@ -110,7 +108,7 @@ end
 	# ============== Testing with Monte Carlo
 
 	# DGP parameters
-	n = 1000
+	n = 250
 	alpha_0 = 3.
 	alpha_1 = 0.8
 	alpha_2 = 1.5
@@ -130,34 +128,36 @@ end
 		beta_2 * x2 .+ 1.1 * randn(length(x1))
 	gen_d(x1::Array{Float64}, x2::Array{Float64}) =  Int.(1.3 * x1 .+
 			5 * x2 .>= randn(length(x1)))
+	np_options = Dict(:bandwidth => :optimal, :kernel => gaussian_kernel, :poldegree => 2)
 
 	# monte carlo
-	mc_reps = 1000
-	samples = @distributed (vcat) for rep in 1:mc_reps
-		# generate data
-		x = gen_x(n)
-		d = gen_d(x[1, :], x[2, :])
-		y1 = gen_y1(x[1, :], x[2, :])
-		y0 = gen_y0(x[1, :], x[2, :])
-		y = @. d * y1 + (1 - d) * y0
-		# set up model
-		mam = MatchingModel(y, d, Array(x'))
-		#	---	test mathcing on covariates
-		numberof_neighbours = 2
-		matching_method = :propscore_logit
-		att_hat = att_matchingestimator(mam, k=numberof_neighbours,
-			matching_method=matching_method)
-		[att_hat sum(x[1, d .== 1]) / sum(d) sum(x[2, d .== 1]) / sum(d)]
+	mc_reps = 500
+	for matching_method in [:covariates, :propscore_logit, :propscore_nonparametric]
+		samples = @distributed (vcat) for rep in 1:mc_reps
+			# generate data
+			x = gen_x(n)
+			d = gen_d(x[1, :], x[2, :])
+			y1 = gen_y1(x[1, :], x[2, :])
+			y0 = gen_y0(x[1, :], x[2, :])
+			y = @. d * y1 + (1 - d) * y0
+			# set up model
+			mam = MatchingModel(y, d, Array(x'))
+			#	---	test mathcing on covariates
+			numberof_neighbours = 2
+			matching_method = :propscore_logit
+			att_hat = att_matchingestimator(mam, k=numberof_neighbours,
+				matching_method=matching_method, np_options=np_options)
+			[att_hat sum(x[1, d .== 1]) / sum(d) sum(x[2, d .== 1]) / sum(d)]
+		end
+		# unpack mc samples and average them out
+		att_hat = sum(samples[:, 1]) / mc_reps
+		mean_x1_d1 = sum(samples[:, 2]) / mc_reps
+		mean_x2_d1 = sum(samples[:, 3]) / mc_reps
+		att = beta_0 - alpha_0 + (beta_1 - alpha_1) * mean_x1_d1 +
+			(beta_2 - alpha_2) * mean_x2_d1
+		@test isapprox(att_hat, att, atol=1.5) == true
 	end
-	# unpack mc samples and average them out
-	att_hat = sum(samples[:, 1]) / mc_reps
-	mean_x1_d1 = sum(samples[:, 2]) / mc_reps
-	mean_x2_d1 = sum(samples[:, 3]) / mc_reps
-	att = beta_0 - alpha_0 + (beta_1 - alpha_1) * mean_x1_d1 +
-		(beta_2 - alpha_2) * mean_x2_d1
-	@test isapprox(att_hat, att, atol=1.5) == true
 end
-
 
 # testing ate_blockingestimator
 @testset "ate_blockingestimator" begin
@@ -182,10 +182,9 @@ end
 	# ============== Testing with Monte Carlo
 
 	# DGP parameters
-	n = 2000
 	mu_0 = 3.
 	mu_1 = 5.  # will imply ATE = 2.
-	sigma_x1 = 0.9
+	sigma_x1 = 0.8
 	sigma_x2 = 0.7
 	rho = 0.
 	covar = rho * sigma_x1 * sigma_x2
@@ -196,22 +195,33 @@ end
 		0.9 * randn(length(x1))
 	gen_y1(x1::Array{Float64}, x2::Array{Float64}) = mu_1 .+ 3.1 * x1 .+ 1.8 * x2 .+
 		1.1 * randn(length(x1))
-	gen_d(x1::Array{Float64}, x2::Array{Float64}) =  Int.(1.3 * x1 .+ 5 * x2 .>= randn(length(x1)))
+	gen_d(x1::Array{Float64}, x2::Array{Float64}) =  Int.(1.1 * x1 .+ 0.5 * x2 .>= randn(length(x1)))
+	np_options = Dict(:bandwidth => :optimal, :kernel => gaussian_kernel, :poldegree => 2)
 
 	# monte carlo
-	mc_reps = 1000
-	atehat_sum = @distributed (+) for rep in 1:mc_reps
-		# generate data
-		x = gen_x(n)
-		d = gen_d(x[1, :], x[2, :])
-		y1 = gen_y1(x[1, :], x[2, :])
-		y0 = gen_y0(x[1, :], x[2, :])
-		y = @. d * y1 + (1 - d) * y0
-		# set up model
-		mam = MatchingModel(y, d, Array(x'))
-		#	---	test mathcing on covariates
-		block_boundaries = collect(0:0.1:1)
-		ate_blockingestimator(mam, block_boundaries=block_boundaries)
+	mc_reps = 500
+	for propscore_estimation in [:nonparametric, :logit]
+		if propscore_estimation == :logit
+			n = 2000
+			block_boundaries = collect(0:0.1:1)
+		else # speed up testing for nonparametric estimation,, using smaller n
+			n = 250
+			block_boundaries = collect(0:0.2:1)
+		end
+		atehat = @distributed (vcat) for rep in 1:mc_reps
+			# generate data
+			x = gen_x(n)
+			d = gen_d(x[1, :], x[2, :])
+			y1 = gen_y1(x[1, :], x[2, :])
+			y0 = gen_y0(x[1, :], x[2, :])
+			y = @. d * y1 + (1 - d) * y0
+			# set up model
+			mam = MatchingModel(y, d, Array(x'))
+			ate_blockingestimator(mam, block_boundaries=block_boundaries,
+				propscore_estimation=propscore_estimation, np_options=np_options)
+		end
+		# drop nan values occuring because of overlap violation
+		filter!(!isnan, atehat)
+		@test isapprox(sum(atehat) / length(atehat), mu_1 - mu_0, atol=1.5) == true
 	end
-	@test isapprox(atehat_sum / mc_reps, mu_1 - mu_0, atol=1.) == true
 end

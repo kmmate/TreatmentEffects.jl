@@ -2,3 +2,4 @@ GLM
 DataFrames
 StatsBase
 Distances
+IterTools

@@ -37,7 +37,7 @@ Estimate Average Treatment Effect (ATE) with k-nearest neighbour matching.
 !!! warning
 
 In nonparametric propensity score estimation, bounded support kernels 
-(`triangular_kernel`, `uniform_kernel`) often lead to zero kernel weights
+(`triangular_kernel`, `uniform_kernel`) may lead to zero kernel weights
 and hence singular matrix when estimating propensity score with WLS.
 Use `gaussian_kernel` or `epanechnikov_kernel` instead.
 
@@ -135,7 +135,7 @@ Estimate Average Treatment Effect (ATT) with k-nearest neighbour matching.
 !!! warning
 
 In nonparametric propensity score estimation, bounded support kernels 
-(`triangular_kernel`, `uniform_kernel`) often lead to zero kernel weights
+(`triangular_kernel`, `uniform_kernel`) may lead to zero kernel weights
 and hence singular matrix when estimating propensity score with WLS.
 Use `gaussian_kernel` or `epanechnikov_kernel` instead.
 
@@ -213,6 +213,15 @@ end
 Estimate Average Treatment Effect (ATE) with blocking on propensity score.
 
 Note: blocking estimation as also known as stratification.
+
+!!! warning
+
+The estimator is quite sensitive to overlap assumption:
+it requires that the propensity score in the treated group overlaps with the
+propensity score in the control group. Formally:
+support(Prob(treatment|x)|treated group)=support(Prob(treatment|x)|control group).
+If the assumption is violated, it may return `NaN`.
+
 
 ##### Arguments
 - `m`::MatchingModel : MatchingModel model type
