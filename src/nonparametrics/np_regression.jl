@@ -32,7 +32,13 @@ Estimates the conditional expected value ``m(x)=E[y|X=x]``.
 - `x`::Array{<:Real} :  Sample of covariates. Either ``n``-long Array{<:Real,1}
 						or ``n``-by-``d`` Array{<:Real, 2}
 - `bandwidth`::Float64 : Bandwidth of kernel
-- `poldegree`::Int64 : Degree of polynomial
+- `poldegree`::Int64 : Degree of polynomial.
+					   Include: an intercept; all the powers of variables up to `poldegree`,
+					   starting from 1; interactions between variables of order up to
+					   ``min([poldegree, d])``.
+					   For eg. `poldegree`=3, `d=2` will include second order
+					   interactions, squares, cubic terms, the main effects and an
+					   intercept.
 - `kernel`::Function : One of the kernels in `kernels.jl`
 
 ##### Returns
@@ -46,7 +52,7 @@ y = 2 .* cos.(x[:, 1]) .+ (1 .- sin.(x[:, 2])) .^ 2 .* x[:, 2] .^ 3 + randn(n)
 x0 = [0., 0.]
 poldegree = 2
 d = size(x)[2]
-bandwidth = n ^ (- 1 / (2 * poldegree + d + 2))  # AMISE minimiser bandwidth choice
+bandwidth = n ^ (- 1 / (2 * poldegree + d + 2))  # AMISE minimiser bandwidth choice for poldegree<=d
 mhat = localpoly_regression(x0, y, x, bandwidth, poldegree=poldegree, kernel=uniform_kernel)
 println("m(x0) = E[y| x0] = 2.", ". Estimated m(x0) = ", mhat)
 ```
@@ -66,9 +72,6 @@ function localpoly_regression(x0::T where T<:Union{<:Real, Array{<:Real, 1}},
 		d = size(x)[2]  # number of regressors
 	else
 		error("`x` must be either 1 or 2 dimensional")
-	end
-	if poldegree > d
-		error("`poldegree` cannot be larger than number of variables in `x`")	
 	end
 	if poldegree < 1
 		error("`poldegree` cannot be smaller than 1")
@@ -129,8 +132,7 @@ Based on [ScikitLearn.Preprocessing](https://github.com/cstjean/ScikitLearn.jl/b
 	Array{<:Real, 2} where ``d`` is the number of variables,
 	``n`` is the number of observations
 - `poldegree`::Int64 : Highest degree of the polynomial to be created.
-	Must be smaller or equal to the number of variables in `x`.
-	For eg. `poldegree`=2 will include seconds order interactions and squres, 
+	For eg. `poldegree`=3, `d=2` will include second order interactions, squares, cubic terms,
 	the main effects and an intercept.
 
 ##### Returns
@@ -147,15 +149,12 @@ function polynomial_features(x::Array{<:Real}, poldegree::Int64)
 	else
 		error("`x` must be 1 or 2 dimensional")
 	end
-	if poldegree > d
-		error("`poldegree` cannot be larger than number of variables in `x`")	
-	end
 	if poldegree < 1
 		error("`poldegree` cannot be smaller than 1")
 	end
 	
 	# add features degree by degree
-	no_outputvariables = sum([binomial(d, k) for k in 1:poldegree]) +
+	no_outputvariables = sum([binomial(d, k) for k in 1:minimum([poldegree, d])]) +
 		d * (poldegree - 1) + 1
 	x_out = zeros(n, no_outputvariables)
 	x_out[:, 1] = ones(n)  # intercept
@@ -171,10 +170,12 @@ function polynomial_features(x::Array{<:Real}, poldegree::Int64)
 			idx += 1
 		end
 		# add interaction effects, ie x1*x2 etc.
-		ss = IterTools.subsets(collect(1:d), degree)
-		for s in ss
-			x_out[:, idx] = prod(x[:, s], dims=2)[:]  # multipy columns elementwise
-			idx +=1
+		if degree <= d
+			ss = IterTools.subsets(collect(1:d), degree)
+			for s in ss
+				x_out[:, idx] = prod(x[:, s], dims=2)[:]  # multipy columns elementwise
+				idx +=1
+			end
 		end
 	end
 	return x_out
