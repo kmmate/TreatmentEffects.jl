@@ -39,11 +39,11 @@ function predict_propscore(d::Array{<:Real, 1},
 		df_x_names = [Symbol("x$i") for i in 1:size(x)[2]]
 		df_x = DataFrame(x, df_x_names)
 		df = hcat(df_d, df_x)
-		pscore_hat = logit_predict(df, df_x_names)
+		pscore_hat = _logit_predict(df, df_x_names)
 		return pscore_hat
 	# nonparametric
 	elseif estimation_method == :nonparametric
-		pscore_hat = nonparametric_predict(d, x, np_options)
+		pscore_hat = _nonparametric_predict(d, x, np_options)
 		return pscore_hat
 	end
 end
@@ -64,7 +64,7 @@ Predict the propensity score P(D=1|X) with logistic regression.
 ##### Returns
 - `pscore_hat`::Array{Float64, 1} : Predicted propensity score
 """
-function logit_predict(df::DataFrame, df_x_names::Array{Symbol, 1})
+function _logit_predict(df::DataFrame, df_x_names::Array{Symbol, 1})
 	# run `d` on all the covariates
 	lhs = :d
 	rhs = Expr(:call, :+, df_x_names...)
@@ -81,7 +81,7 @@ Nonparametric auxiliary estimators for internal use
 """
 Predict the propensity score P(D=1|X) with nonparametric regression.
 """
-function nonparametric_predict(d::Array{<:Real, 1},
+function _nonparametric_predict(d::Array{<:Real, 1},
 						   	   x::Array{<:Real},
 						   	   np_options::Dict)
 	n = length(d)
