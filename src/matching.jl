@@ -74,6 +74,14 @@ function ate_matchingestimator(m::MatchingModel;
             error("for `np_options[:bandwidth] == :optimal`, `np_options[:poldegree]` " *
                   " must be <= number of covariates in `m.x`")
         end
+        # check np_options
+        if haskey(np_options, :kernel) == false
+            error("`np_options` must have key :kernel")
+        elseif haskey(np_options, :bandwidth) == false
+            error("`np_options` must have key :bandwidth")
+        elseif haskey(np_options, :poldegree) == false
+            error("`np_options` must have key :poldegree")
+        end
     end
     # separate treatment and control group
 	n = size(m.y)[1]  # sample size
@@ -185,6 +193,14 @@ function att_matchingestimator(m::MatchingModel;
         if (no_cov < np_options[:poldegree]) && (np_options[:bandwidth] == :optimal)
             error("for `np_options[:bandwidth] == :optimal`, `np_options[:poldegree]` " *
                   " must be <= number of covariates in `m.x`")
+        end
+        # check np_options
+        if haskey(np_options, :kernel) == false
+            error("`np_options` must have key :kernel")
+        elseif haskey(np_options, :bandwidth) == false
+            error("`np_options` must have key :bandwidth")
+        elseif haskey(np_options, :poldegree) == false
+            error("`np_options` must have key :poldegree")
         end
     end
     # separate treatment and control group
@@ -306,6 +322,14 @@ function ate_blockingestimator(m::MatchingModel;
         if (no_cov < np_options[:poldegree]) && (np_options[:bandwidth] == :optimal)
             error("for `np_options[:bandwidth] == :optimal`, `np_options[:poldegree]` " *
                   " must be <= number of covariates in `m.x`")
+        end
+        # check np_options
+        if haskey(np_options, :kernel) == false
+            error("`np_options` must have key :kernel")
+        elseif haskey(np_options, :bandwidth) == false
+            error("`np_options` must have key :bandwidth")
+        elseif haskey(np_options, :poldegree) == false
+            error("`np_options` must have key :poldegree")
         end
     end
     # checks
