@@ -17,8 +17,7 @@ using StatsBase, Distances
 						  matching_method::Symbol = :propscore_logit,
 						  np_options::Dict = Dict(:kernel => gaussian_kernel,
 							   						   :bandwidth => :optimal,
-							   						   :poldegree => 2)
-							   )
+							   						   :poldegree => 2))
 
 
 Estimate Average Treatment Effect (ATE) with k-nearest neighbour matching.
@@ -32,7 +31,8 @@ Estimate Average Treatment Effect (ATE) with k-nearest neighbour matching.
 	Dict(:kernel => triangular_kernel, :bandwidth => :optimal, :poldegree => 2),
 	where :kernel is function in `kernels.jl`, :bandwidth is either :optimal
 	for AMISE optimal bandwidth or a Float64,  :poldegree is Int64, 
-	the polynomial degree in the local polynomial regression
+	the polynomial degree in the local polynomial regression.
+    For `:bandwidth == :optimal`, `:poldegree` must be <= number of covariates in `m.x`.
 
 !!! warning
 
@@ -59,9 +59,23 @@ function ate_matchingestimator(m::MatchingModel;
 							   matching_method::Symbol = :propscore_logit,
 							   np_options::Dict = Dict(:kernel => gaussian_kernel,
 							   						   :bandwidth => :optimal,
-							   						   :poldegree => 2)
-							   )
-	# separate treatment and control group
+							   						   :poldegree => 2))
+	# nonparametric checks
+    if matching_method == :propscore_nonparametric
+        # obtain number of covariates, no_cov
+        dim = ndims(m.x)
+        if dim == 1
+            no_cov = 1
+        elseif dim == 2
+            no_cov = size(m.x)[2]
+        end
+        # check poldegree
+        if (no_cov < np_options[:poldegree]) && (np_options[:bandwidth] == :optimal)
+            error("for `np_options[:bandwidth] == :optimal`, `np_options[:poldegree]` " *
+                  " must be <= number of covariates in `m.x`")
+        end
+    end
+    # separate treatment and control group
 	n = size(m.y)[1]  # sample size
     n_t = Int(sum(m.d))  # no. of treated units
     n_c = Int(n - n_t)  # no. of control units
@@ -95,13 +109,13 @@ function ate_matchingestimator(m::MatchingModel;
     # estimate a control outcome, Y(0), for each treated unit with matching
     yc_hat = zeros(n_t)
     for treated_unit in 1:n_t
-        @inbounds yc_hat[treated_unit] = estimate_counterfactual(k,
+        @inbounds yc_hat[treated_unit] = _estimate_counterfactual(k,
         	distance_matrix[treated_unit, :], y_c)
     end
     # estimate a treated outcome, Y(1), for each control unit with matching
     yt_hat = zeros(n_c)
     for control_unit in 1:n_c
-        @inbounds yt_hat[control_unit] = estimate_counterfactual(k,
+        @inbounds yt_hat[control_unit] = _estimate_counterfactual(k,
         	distance_matrix[:, control_unit], y_t)
     end
     # compute the ATE estimator: 1/n * sum_i(Yhat_i(1)-Yhat_i(0))
@@ -116,8 +130,7 @@ end
 						  matching_method::Symbol = :propscore_logit,
 						  np_options::Dict = Dict(:kernel => gaussian_kernel,
 						  						  :bandwidth => :optimal,
-						 						  :poldegree => 2)
-							   )
+						 						  :poldegree => 2))
 
 Estimate Average Treatment Effect (ATT) with k-nearest neighbour matching.
 
@@ -130,7 +143,8 @@ Estimate Average Treatment Effect (ATT) with k-nearest neighbour matching.
 	Dict(:kernel => triangular_kernel, :bandwidth => :optimal, :poldegree => 2),
 	where :kernel is function in `kernels.jl`, :bandwidth is either :optimal
 	for AMISE optimal bandwidth or a Float64,  :poldegree is Int64, 
-	the polynomial degree in the local polynomial regression
+	the polynomial degree in the local polynomial regression.
+    For `:bandwidth == :optimal`, `:poldegree` must be <= number of covariates in `m.x`.
 
 !!! warning
 
@@ -157,9 +171,23 @@ function att_matchingestimator(m::MatchingModel;
 							   matching_method::Symbol = :propscore_logit,
 							   np_options::Dict = Dict(:kernel => gaussian_kernel,
 							   						   :bandwidth => :optimal,
-							   						   :poldegree => 2)
-							   )
-	# separate treatment and control group
+							   						   :poldegree => 2))
+	# nonparametric checks
+    if matching_method == :propscore_nonparametric
+        # obtain number of covariates, no_cov
+        dim = ndims(m.x)
+        if dim == 1
+            no_cov = 1
+        elseif dim == 2
+            no_cov = size(m.x)[2]
+        end
+        # check poldegree
+        if (no_cov < np_options[:poldegree]) && (np_options[:bandwidth] == :optimal)
+            error("for `np_options[:bandwidth] == :optimal`, `np_options[:poldegree]` " *
+                  " must be <= number of covariates in `m.x`")
+        end
+    end
+    # separate treatment and control group
 	n = size(m.y)[1]  # sample size
     n_t = Int(sum(m.d))  # no. of treated units
     n_c = Int(n - n_t)  # no. of control units
@@ -193,7 +221,7 @@ function att_matchingestimator(m::MatchingModel;
     # estimate a control outcome, Y(0), for each treated unit with matching
     yc_hat = zeros(n_t)
     for treated_unit in 1:n_t
-        @inbounds yc_hat[treated_unit] = estimate_counterfactual(k,
+        @inbounds yc_hat[treated_unit] = _estimate_counterfactual(k,
         	distance_matrix[treated_unit, :], y_c)
     end
     # compute the ATT estimator: 1/n_t * sum_{i in treated}(Yhat_i(1)-Yhat_i(0))
@@ -230,12 +258,13 @@ If the assumption is violated, it may return `NaN`.
 - `block_boundaries`::Array{Float64, 1} : Boundaries of estimated propensity score
 	used to create strata/blocks. `length(block_boundaries)` = number of blocks + 1.
 	Elements must be in increasing order, with each element between 0 and 1.
-	Must incluide 0 and 1 as endpoints.
+	Must include 0 and 1 as endpoints.
 - `np_options`::Dict : Nonparametric propensity score estimation options,
 	Dict(:kernel => triangular_kernel, :bandwidth => :optimal, :poldegree => 2),
 	where :kernel is function in `kernels.jl`, :bandwidth is either :optimal
 	for AMISE optimal bandwidth or a Float64,  :poldegree is Int64, 
-	the polynomial degree in the local polynomial regression
+	the polynomial degree in the local polynomial regression.
+    For `:bandwidth == :optimal`, `:poldegree` must be <= number of covariates in `m.x`.
 
 
 !!! warning
@@ -264,7 +293,22 @@ function ate_blockingestimator(m::MatchingModel;
 							   np_options::Dict = Dict(:kernel => gaussian_kernel,
 							   						   :bandwidth => :optimal,
 							   						   :poldegree => 2))
-	# checks
+	# nonparametric checks
+    if propscore_estimation == :propscore_nonparametric
+        # obtain number of covariates, no_cov
+        dim = ndims(m.x)
+        if dim == 1
+            no_cov = 1
+        elseif dim == 2
+            no_cov = size(m.x)[2]
+        end
+        # check poldegree
+        if (no_cov < np_options[:poldegree]) && (np_options[:bandwidth] == :optimal)
+            error("for `np_options[:bandwidth] == :optimal`, `np_options[:poldegree]` " *
+                  " must be <= number of covariates in `m.x`")
+        end
+    end
+    # checks
 	if block_boundaries[1] != 0
 		error("`block_boundaries` must contain 0 as its first element")
 	elseif block_boundaries[end] != 1
@@ -316,7 +360,7 @@ end
 
 
 """
-    estimate_counterfactual(k::Int64, distance_array::Array{Float64, 1}, y_pool::Array{<:Real, 1})
+    _estimate_counterfactual(k::Int64, distance_array::Array{Float64, 1}, y_pool::Array{<:Real, 1})
 
 Estimate the counterfactual potential outcome (Y(1) or Y(0)) with matching.
 
@@ -332,7 +376,9 @@ the k-nearest units in the other (treatment or control) group.
 ##### Returns
 - `y_counterfactual_hat`::Float64 : Estimated counterfactual outcome
 """
-function estimate_counterfactual(k::Int64, distance_array::Array{Float64, 1}, y_pool::Array{<:Real, 1})
+function _estimate_counterfactual(k::Int64,
+                                  distance_array::Array{Float64, 1},
+                                  y_pool::Array{<:Real, 1})
     # indices of units in the other group:
     # the first index is that of the other-group-unit with the smallest distance
     # from the unit to match to
