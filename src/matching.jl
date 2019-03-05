@@ -82,6 +82,13 @@ function ate_matchingestimator(m::MatchingModel;
         elseif haskey(np_options, :poldegree) == false
             error("`np_options` must have key :poldegree")
         end
+        if isa(np_options[:kernel], Function) == false
+            error("`np_options[:kernel]` must be Function")
+        elseif isa(np_options[:poldegree], Int) == false
+            error("`np_options[:poldegree]` must be Integer")
+        elseif (np_options[:bandwidth] != :optimal) && (isa(np_options[:bandwidth], Float64) == false)
+            error("`np_options[:bandwidth]` must be either :optimal or Float64")
+        end
     end
     # separate treatment and control group
 	n = size(m.y)[1]  # sample size
@@ -201,6 +208,13 @@ function att_matchingestimator(m::MatchingModel;
             error("`np_options` must have key :bandwidth")
         elseif haskey(np_options, :poldegree) == false
             error("`np_options` must have key :poldegree")
+        end
+        if isa(np_options[:kernel], Function) == false
+            error("`np_options[:kernel]` must be Function")
+        elseif isa(np_options[:poldegree], Int) == false
+            error("`np_options[:poldegree]` must be Integer")
+        elseif (np_options[:bandwidth] != :optimal) && (isa(np_options[:bandwidth], Float64) == false)
+            error("`np_options[:bandwidth]` must be either :optimal or Float64")
         end
     end
     # separate treatment and control group
@@ -330,6 +344,13 @@ function ate_blockingestimator(m::MatchingModel;
             error("`np_options` must have key :bandwidth")
         elseif haskey(np_options, :poldegree) == false
             error("`np_options` must have key :poldegree")
+        end
+        if isa(np_options[:kernel], Function) == false
+            error("`np_options[:kernel]` must be Function")
+        elseif isa(np_options[:poldegree], Int) == false
+            error("`np_options[:poldegree]` must be Integer")
+        elseif (np_options[:bandwidth] != :optimal) && (isa(np_options[:bandwidth], Float64) == false)
+            error("`np_options[:bandwidth]` must be either :optimal or Float64")
         end
     end
     # checks
