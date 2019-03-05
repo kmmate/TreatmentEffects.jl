@@ -263,6 +263,7 @@ mutable struct RDDModel <: CIAModel
 	y::Array{<:Real, 1}
 	d::Array{<:Real, 1}
 	x::Array{<:Real, 1}
+	cutoff::Float64
 	function RDDModel(y::Array{<:Real, 1}, d::Array{<:Real, 1}, x::Array{<:Real, 1}, cutoff::Float64)
 		if size(y)[1] == size(d)[1] == size(x)[1]
 			return new(y, d, x, cutoff)			
