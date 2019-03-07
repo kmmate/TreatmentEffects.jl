@@ -58,7 +58,7 @@ Calonico, Cattaneo, and Titiunik (2014): Robust Nonparametric Confidence Interva
 """
 function rdd_sharpestimator(m::RDDModel,
 							assignment_rule::Symbol,
-							bandwidth::Union{T where T<:Real, Array{<:Real, 1}},
+							bandwidth::Union{T where T<:Real, Array{<:Real, 1}};
 							bias_correction::Bool = true,
 							np_options::Dict = Dict(:kernel => triangular_kernel,
 													:poldegree => 1),
