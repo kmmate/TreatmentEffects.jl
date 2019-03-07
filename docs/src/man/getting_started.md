@@ -44,7 +44,8 @@ indicate abstract types.
 			* If **cut-off based treatment participation rule** : [`RDDModel`](@ref)
 
 				By cut-off based treatment participation we mean that ``D_i = 1`` if and only if
-				``x_i`` exceeds a certain cut-off value. This gives rise to the Regression Discontinuity Design.
+				``x_i`` exceeds/is below a certain cut-off value. This gives rise to the
+				Regression Discontinuity Design.
 
 				Implemented methods: 
 
