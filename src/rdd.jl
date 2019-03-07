@@ -136,19 +136,11 @@ function rdd_sharpestimator(m::RDDModel,
 
 	# compute the (bias-corrected) estimate
 	# estimate E[Y(1)|X=cutoff]
-	muhat_t = localpoly_regression(x0=m.cutoff,
-								   y=m.y[m.d .== 1],
-								   x=m.x[m.d .== 1],
-								   bandwidth=h_opt,
-								   poldegree=poldegree,
-								   kernel=kernel)
+	muhat_t = localpoly_regression(m.cutoff, m.y[m.d .== 1], m.x[m.d .== 1], h_opt,
+								   poldegree=poldegree, kernel=kernel)
     # estimate E[Y(0)|X=cutoff]
-	muhat_c = localpoly_regression(x0=m.cutoff,
-								   y=m.y[m.d .== 0],
-								   x=m.x[m.d .== 0],
-								   bandwidth=h_opt,
-								   poldegree=poldegree,
-								   kernel=kernel)
+	muhat_c = localpoly_regression(m.cutoff, m.y[m.d .== 0], m.x[m.d .== 0], h_opt,
+								   poldegree=poldegree, kernel=kernel)
 	# rdd estimand
 	tau_hat = muhat_t - muhat_c
 	return tau_hat
@@ -157,10 +149,10 @@ end
 
 """
      _lscv_sharprdd(m::RDDModel,
-						bandwidth::Array{<:Real, 1},
-						poldegree::Int64,
-						kernel::Function,
-						lscv_options::Dict)
+					bandwidth::Array{<:Real, 1},
+					poldegree::Int64,
+					kernel::Function,
+					lscv_options::Dict)
 
 Finds optimal bandwidth for sharp regression discontinuity design with
 leave-one-out least squares cross-validation.
@@ -247,11 +239,7 @@ function _lscv_sharprdd(m::RDDModel,
 				mask = mask .* (x_w .>= cutoff)
 			end
 			# predict y
-			mhat = localpoly_regression(x0=x_w[i],
-										y=y[mask],
-										x=x[mask],
-										bandwidth=h,
-										poldegree=poldegree,
+			mhat = localpoly_regression(x_w[i], y[mask], x[mask], h, poldegree=poldegree,
 										kernel=kernel)
 			yhat_w[i] = mhat
 		end
