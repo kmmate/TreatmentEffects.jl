@@ -233,9 +233,10 @@ Represent a Regression Discontinuity Design (RDD) model.
 RDD is a special case of the Conditional Independence Assumption model
 where given a *single* covariate ``x``, the potential outcomes are independent
 of participation, that is given ``x``, ``[Y(0), Y(1)]`` is
-independent of ``D``. This follows from the participation rule
+independent of ``D``. This follows from the participation rule: either (i)
 ``D_i = 1`` if and only if ``x_i >= c`` for the `cutoff` value, ``c``,
-and ``D_i = 0 `` otherwise.
+and ``D_i = 0 `` otherwise; or (ii) ``D_i = 1`` if and only if ``x_i <= c``
+for the `cutoff` value, ``c``, and ``D_i = 0 `` otherwise
 
 
 It is assumed that the only source of uncertainty is sampling. 
@@ -253,7 +254,7 @@ from a population.
 using TreatmentEffects, CSV
 data = read_csv("rdd_data.csv")
 y = data[:outcome]
-d = data[:treatment_takeup]
+d = data[:treatment_takeup]  # d_i=1 iff i is treated
 x = data[:running_variable]
 cutoff = 0.
 rdm = RDDModel(y, d, x, cutoff)
