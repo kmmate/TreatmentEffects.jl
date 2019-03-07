@@ -19,7 +19,12 @@ export
 	gaussian_kernel,
 	epanechnikov_kernel,
 	localpoly_regression,
-	polynomial_features
+	polynomial_features,
+	# other estimators
+	predict_propscore,
+	# rdd
+	RDDModel,
+	rdd_sharpestimator
 
 
 include("data_cleaning.jl")
@@ -29,4 +34,5 @@ include("nonparametrics\\kernels.jl")
 include("nonparametrics\\np_regression.jl")
 include("exogenous_participation.jl")
 include("matching.jl")
+include("rdd.jl")
 end
