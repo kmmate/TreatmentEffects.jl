@@ -67,9 +67,9 @@ function rdd_sharpestimator(m::RDDModel,
 													  :window => :median))
 	# check assignment rule
 	if assignment_rule == :above_cutoff
-		d_implied = Int.(m.x >=. m.cutoff)
+		d_implied = Int.(m.x .>= m.cutoff)
 	elseif assignment_rule == :below_cutoff
-		d_implied = Int.(m.x <=. m.cutoff)
+		d_implied = Int.(m.x .<= m.cutoff)
 	else
 		error("`assignment_rule` must be either `:above_cutoff` or `:below_cutoff`")
 	end
