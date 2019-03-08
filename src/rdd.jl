@@ -212,7 +212,6 @@ function _lscv_sharprdd(m::RDDModel,
 	y_w = y[window]
 	d_w = d[window]
 	x_w = x[window]
-	println("typeof x_w = ", typeof(x_w))
 	n_w = length(y_w)
 
 	# find optimal bandwidth
@@ -233,11 +232,11 @@ function _lscv_sharprdd(m::RDDModel,
 			# ...leave out i in the window from the used subsample data
 			mask[ssidx_w[i]] = false
 			# if i is below cutoff, use only below-cutoff (subsample) data to predict y
+			println("mask = ", mask)
 			if x_w[i] <= m.cutoff
 				mask = mask .* (x_w .<= m.cutoff)
 			# if i is above cutoff, use only above-cutoff (subsample) data to predict y
 			else
-				println("mask = ", mask)
 				mask = mask .* (x_w .>= m.cutoff)
 			end
 			# predict y
