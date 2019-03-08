@@ -187,7 +187,7 @@ function _lscv_sharprdd(m::RDDModel,
 	end
 	n_s = length(y)  # = lscv_options[:subsamplesize] if subsampling true, = n oterwise
 	# adjust given bandwidth for subsampling (convert to subsamplesize)
-	bandwidth_s = map(x -> x * (n / n_s) ^ (- 1 / (2 * poldegree + 3)), bandwidth)
+	bandwidth_s = map(x -> x * (n_s / n) ^ (- 1 / (2 * poldegree + 3)), bandwidth)
 
 	# apply window for loss-evaluation
 	if isa(lscv_options[:window], Tuple)
