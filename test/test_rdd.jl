@@ -38,6 +38,6 @@ Tests for rdd.jl
 	    		  		   np_options=np_options, lscv_options=lscv_options)
 		tau_hat
 	end
-	println("Predicted CATE($(cutoff)) = $(tauhat_sum / mc_reps). tau = $(tau).")
-	@test isapprox(tauhat_sum / mc_reps, mu_1 - mu_0, atol=0.2) == true
+	tau = mu_1 - mu_0
+	@test isapprox(tauhat_sum / mc_reps, tau, atol=0.2) == true
 end
