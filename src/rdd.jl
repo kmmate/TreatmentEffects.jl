@@ -102,7 +102,7 @@ function rdd_sharpestimator(m::RDDModel,
 		end
 		if isa(lscv_options[:subsampling], Bool) == false
 			error("`lscv_options[:subsampling]` must be Bool")
-		elseif isa(lscv_options[:subsamplesize], Int)
+		elseif isa(lscv_options[:subsamplesize], Int) == false
 			error("`lscv_options[:subsamplesize]` must be Integer")
 		end
 		if isa(lscv_options[:window], Tuple)
