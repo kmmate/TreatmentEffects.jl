@@ -1,7 +1,7 @@
-using Documenter, TreatmentEffect
+using Documenter, TreatmentEffects
 
-makedocs(modules = [TreatmentEffect], sitename = "TreatmentEffect.jl")
+makedocs(modules = [TreatmentEffects], sitename = "TreatmentEffects.jl")
 
 deploydocs(
-    repo = "github.com/kmmate/TreatmentEffect.jl.git",
+    repo = "github.com/kmmate/TreatmentEffects.jl.git",
 )
