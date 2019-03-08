@@ -20,7 +20,7 @@ Tests for rdd.jl
 	hopt_propto = n ^ (- 1 / (2 * poldegree + 3))  #  AMISE minimiser bandwidth choice
 	bandwidth = [0.5 * hopt_propto, hopt_propto, 1.5 * hopt_propto]
 	np_options = Dict(:kernel => triangular_kernel, :poldegree => poldegree)
-	lscv_options = Dict(:subsampling => true, :subsamplesize => round(Int, length(rdm.y) / 2),
+	lscv_options = Dict(:subsampling => true, :subsamplesize => round(Int, n / 2),
                     	:window => :median)
 	# monte carlo
 	mc_reps = 500
