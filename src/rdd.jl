@@ -10,22 +10,18 @@ TODO:
 using StatsBase
 """
     function rdd_sharpestimator(m::RDDModel,
-							assignment_rule::Symbol,
-							bandwidth::Union{T where T<:Real, Array{<:Real, 1}},
-							bias_correction::Bool = true,
-							np_options::Dict = Dict(:kernel => triangular_kernel,
-													:poldegree => 1),
-							lscv_options::Dict = Dict(:subsamplesize => length(m.y) / 2,
-													  :window => :median))
+								bandwidth::T where T<:Union{<:Real, Array{<:Real, 1}};
+								bias_correction::Bool = true,
+								np_options::Dict = Dict(:kernel => triangular_kernel,
+														:poldegree => 1),
+								lscv_options::Dict = Dict(:subsamplesize => length(m.y) / 2,
+														  :window => :median))
 
 Estimate sharp regression discontinuity design estimand  ``E[Y(1)-Y(0)| X=cutoff]``
 nonparametrically.
 
 ##### Arguments
 - `m`::RDDModel : RDDModel type
-- `assignment_rule`::Symbol : Either `above_cutoff` or `below_cutoff`, to indicate
-	the assignment rules ``d_i = 1(x_i>=m.cutoff)`` or ``d_i = 1(x_i<=m.cutoff)``,
-	respectively
 - `bandwidth`::Union{T where T<:Real, Array{<:Real, 1}} : Bandwidth used for 
 	nonparametric estimation. If a scalar T<:Real is given, than the given value is
 	used for estimation. If an Array{<:Real, 1} is given, leave-one-out least squares
@@ -57,7 +53,6 @@ Calonico, Cattaneo, and Titiunik (2014): Robust Nonparametric Confidence Interva
 	for Regression-Discontinuity Designs. Econometrica, Vol. 82, No. 6.
 """
 function rdd_sharpestimator(m::RDDModel,
-							assignment_rule::Symbol,
 							bandwidth::T where T<:Union{<:Real, Array{<:Real, 1}};
 							bias_correction::Bool = true,
 							np_options::Dict = Dict(:kernel => triangular_kernel,
@@ -65,20 +60,6 @@ function rdd_sharpestimator(m::RDDModel,
 							lscv_options::Dict = Dict(:subsampling => true,
 													  :subsamplesize => round(Int, length(m.y) / 3),
 													  :window => :median))
-	# check assignment rule
-	if assignment_rule == :above_cutoff
-		d_implied = Int.(m.x .>= m.cutoff)
-	elseif assignment_rule == :below_cutoff
-		d_implied = Int.(m.x .<= m.cutoff)
-	else
-		error("`assignment_rule` must be either `:above_cutoff` or `:below_cutoff`")
-	end
-	# check design
-	if d_implied != m.d
-		@warn("treatment participation data, `m.d`, is not consistent with sharp design " *
-		 	  "or `assignment_rule`. Either the design is not sharp but fuzzy, or " *
-		 	  "the `assignment_rule` is misspecified.")
-	end
 	# check np_options
 	if haskey(np_options, :kernel) == false
 		error("`np_options` must have key :kernel")
