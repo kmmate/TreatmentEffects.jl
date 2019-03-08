@@ -232,12 +232,11 @@ function _lscv_sharprdd(m::RDDModel,
 			# ...leave out i in the window from the used subsample data
 			mask[ssidx_w[i]] = false
 			# if i is below cutoff, use only below-cutoff (subsample) data to predict y
-			println("mask = ", mask)
 			if x_w[i] <= m.cutoff
-				mask = mask .* (x_w .<= m.cutoff)
+				mask = mask .* (x .<= m.cutoff)
 			# if i is above cutoff, use only above-cutoff (subsample) data to predict y
 			else
-				mask = mask .* (x_w .>= m.cutoff)
+				mask = mask .* (x .>= m.cutoff)
 			end
 			# predict y
 			mhat = localpoly_regression(x_w[i], y[mask], x[mask], h, poldegree=poldegree,
