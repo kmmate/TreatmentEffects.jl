@@ -237,5 +237,7 @@ function _lscv_sharprdd(m::RDDModel,
 		# update best h
 		h_opt = sum(loss .<= sse_lst) == h_idx ? h_opt = h : h_opt = h_opt
 	end
+	# adjust h_opt for the subsampling
+	h_opt = h_opt * (n / n_s) ^ (- 1 / (2 * poldegree + 3))
 	return h_opt
 end
