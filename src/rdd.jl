@@ -186,6 +186,8 @@ function _lscv_sharprdd(m::RDDModel,
 		d = m.d
 	end
 	n_s = length(y)  # = lscv_options[:subsamplesize] if subsampling true, = n oterwise
+	# adjust given bandwidth for subsampling (convert to subsamplesize)
+	bandwidth_s = map(x -> x * (n / n_s) ^ (- 1 / (2 * poldegree + 3)), bandwidth)
 
 	# apply window for loss-evaluation
 	if isa(lscv_options[:window], Tuple)
@@ -206,11 +208,11 @@ function _lscv_sharprdd(m::RDDModel,
 	l2loss(y::Array{<:Real, 1}, yhat::Array{<:Real, 1}) = (y .- yhat)' * (y .- yhat)
 	sse_lst = zeros(length(bandwidth))  # sum of squared errors
 	h_idx = 0
-	h_opt = bandwidth[1]  # initial optimal value
+	h_opt = bandwidth_s[1]  # initial optimal value
 	# subsample idx of observations in the window, for leave-one-out cross validation
 	ssidx_w = collect(1:n_s)[window]
 	# loop through all bandwidths
-	for h in bandwidth
+	for h in bandwidth_s
 		h_idx += 1  # update h idx
 		yhat_w = zeros(n_w)  # pre-allocate predicted values
 		# loop through all observations in the cross-val window
@@ -237,7 +239,7 @@ function _lscv_sharprdd(m::RDDModel,
 		# update best h
 		h_opt = sum(loss .<= sse_lst) == h_idx ? h_opt = h : h_opt = h_opt
 	end
-	# adjust h_opt for the subsampling
+	# adjust h_opt for the subsampling (convert back to original sample size)
 	h_opt = h_opt * (n / n_s) ^ (- 1 / (2 * poldegree + 3))
 	return h_opt
 end
