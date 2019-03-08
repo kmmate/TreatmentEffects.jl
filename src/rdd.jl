@@ -41,7 +41,10 @@ nonparametrically.
 	[median of ``x``s below cutoff, median of ``x``s above cutoff] are used.
 
 ##### Returns
-- `tau_hat`::Float64 : Estimated sharp regression discontinuity design estimand
+- `tau_hat`::Float64 : Estimated sharp regression discontinuity design estimand.
+	If `bandwidth` is scalar, only `tau_hat` is returned
+- `h_opt`::Float64 : If `bandwidth` is Array (i.e. LSCV is run), the optimal bandwidth
+	is also returned, and the function returns the Tuple (`tau_hat`, `h_opt`)
 
 ##### Examples
 ```julia
@@ -124,7 +127,11 @@ function rdd_sharpestimator(m::RDDModel,
 								   poldegree=poldegree, kernel=kernel)
 	# rdd estimand
 	tau_hat = muhat_t - muhat_c
-	return tau_hat
+	if cross_validation
+		return (tau_hat, h_opt)
+	else
+		tau_hat
+	end
 end
 
 
