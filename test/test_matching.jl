@@ -84,8 +84,8 @@ end
 	n_subsample = 25_000
 	subsample_idx = rand(1:60_000, n_subsample)
 	datapath = normpath(joinpath(dirname(pathof(TreatmentEffects)), "..", "test/data/matching"))
-	y_raw = Array(CSV.read(joinpath(datapath, "y.csv"), header=false)[:1])[subsample_idx]
-	d_raw = Array(CSV.read(joinpath(datapath, "d.csv"), header=false)[:1])[subsample_idx]
+	y_raw = Array(CSV.read(joinpath(datapath, "y.csv"), header=false)[:,:1])[subsample_idx]
+	d_raw = Array(CSV.read(joinpath(datapath, "d.csv"), header=false)[:,:1])[subsample_idx]
 	x_raw = Array(convert(Matrix, CSV.read(joinpath(datapath, "X.csv"),
 		header=false, delim=';')))[subsample_idx, : ]
 	y, d, x = drop_missing(y_raw, d_raw, x_raw)
@@ -168,8 +168,8 @@ end
 	n_subsample = 25_000
 	subsample_idx = rand(1:60_000, n_subsample)
 	datapath = normpath(joinpath(dirname(pathof(TreatmentEffects)), "..", "test/data/matching"))
-	y_raw = Array(CSV.read(joinpath(datapath, "y.csv"), header=false)[:1])[subsample_idx]
-	d_raw = Array(CSV.read(joinpath(datapath, "d.csv"), header=false)[:1])[subsample_idx]
+	y_raw = Array(CSV.read(joinpath(datapath, "y.csv"), header=false)[:,:1])[subsample_idx]
+	d_raw = Array(CSV.read(joinpath(datapath, "d.csv"), header=false)[:,:1])[subsample_idx]
 	x_raw = Array(convert(Matrix, CSV.read(joinpath(datapath, "X.csv"),
 		header=false, delim=';')))[subsample_idx, : ]
 	y, d, x = drop_missing(y_raw, d_raw, x_raw)

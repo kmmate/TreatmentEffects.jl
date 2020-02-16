@@ -188,7 +188,7 @@ abstract type CIAModel <: ObservationalModel end
 """
 Represent a Matching Model.
 
-A Mathcing Model is the most general subtype of the Conditional Independence Model where
+A Matching Model is the most general subtype of the Conditional Independence Model where
 given a set of covariates, potential outcomes are independent of participation, 
 that is given ``x``, ``[Y(0), Y(1)]`` is independent of ``D``.
 

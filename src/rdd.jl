@@ -14,7 +14,7 @@ using StatsBase
 								bias_correction::Bool = true,
 								np_options::Dict = Dict(:kernel => triangular_kernel,
 														:poldegree => 1),
-								lscv_options::Dict = Dict(:subsamplesize => length(m.y) / 2,
+								lscv_options::Dict = Dict(:subsamplesize => length(m.y) / 3,
 														  :window => :median))
 
 Estimate sharp regression discontinuity design estimand  ``E[Y(1)-Y(0)| X=cutoff]``
@@ -115,7 +115,7 @@ function rdd_sharpestimator(m::RDDModel,
 	# perform cross validation to find optimal bandwidth in `bandwidth` 
 	# using original polynomial degreee
 	else
-		h_opt = _lscv_sharprdd(m, bandwidth, np_options[:poldegree], kernel, lscv_options)
+		h_opt, sse_lst = _lscv_sharprdd(m, bandwidth, np_options[:poldegree], kernel, lscv_options)
 	end
 
 	# compute the (bias-corrected) estimate
@@ -128,7 +128,7 @@ function rdd_sharpestimator(m::RDDModel,
 	# rdd estimand
 	tau_hat = muhat_t - muhat_c
 	if cross_validation
-		return (tau_hat, h_opt)
+		return (tau_hat, h_opt, sse_lst)
 	else
 		tau_hat
 	end
@@ -167,6 +167,7 @@ However, all the observations in the subsample are used for estimation
 
 ##### Returns
 -`h_opt`::typeof(bandwidth[1]) : LSCV-optimal bandwidth in `bandwidth`
+-`sse_lst`::Array{Float64, 1} : estimated LS errors corresponding to bandwidths in `bandwidth`
 """
 function _lscv_sharprdd(m::RDDModel,
 						bandwidth::Array{<:Real, 1},
@@ -241,5 +242,5 @@ function _lscv_sharprdd(m::RDDModel,
 	end
 	# adjust h_opt for the subsampling (convert back to original sample size)
 	h_opt = h_opt * (n / n_s) ^ (- 1 / (2 * poldegree + 3))
-	return h_opt
+	return (h_opt, sse_lst)
 end

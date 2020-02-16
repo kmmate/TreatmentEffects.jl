@@ -105,7 +105,7 @@ function ate_matchingestimator(m::MatchingModel;
     	# estimate sample covariance matrix for distance computation
     	cov_hat = StatsBase.cov(m.x)
     	# n_t-by-n_c array with  element (i, j) = distance between 'i'th treated and 'j'th control units
-    	Distances.pairwise!(distance_matrix, Mahalanobis(inv(cov_hat)), x_t', x_c')
+    	Distances.pairwise!(distance_matrix, SqMahalanobis(inv(cov_hat)), x_t', x_c', dims=2)
     elseif matching_method == :propscore_logit || matching_method == :propscore_nonparametric
     	# estimate propensity score
     	if matching_method == :propscore_logit
@@ -118,7 +118,7 @@ function ate_matchingestimator(m::MatchingModel;
     	phat_t = phat[m.d .== 1]  # propensity score in treatment group
     	phat_c = phat[m.d .== 0]  # propensity score in control group
     	# n_t-by-n_c array with  element (i, j) = distance between 'i'th treated and 'j'th control units
-    	Distances.pairwise!(distance_matrix, Euclidean(), phat_t[: ,: ]', phat_c[:, :]')
+    	Distances.pairwise!(distance_matrix, SqEuclidean(), phat_t[: ,: ]', phat_c[:, :]', dims=2)
     end
     
     # estimate a control outcome, Y(0), for each treated unit with matching
@@ -232,7 +232,7 @@ function att_matchingestimator(m::MatchingModel;
     	# estimate sample covariance matrix for distance computation
     	cov_hat = StatsBase.cov(m.x)
     	# n_t-by-n_c array with  element (i, j) = distance between 'i'th treated and 'j'th control units
-    	Distances.pairwise!(distance_matrix, Mahalanobis(inv(cov_hat)), x_t', x_c')
+    	Distances.pairwise!(distance_matrix, SqMahalanobis(inv(cov_hat)), x_t', x_c', dims=2)
     elseif matching_method == :propscore_logit || matching_method == :propscore_nonparametric
     	# estimate propensity score
     	if matching_method == :propscore_logit
@@ -245,7 +245,7 @@ function att_matchingestimator(m::MatchingModel;
     	phat_t = phat[m.d .== 1]  # propensity score in treatment group
     	phat_c = phat[m.d .== 0]  # propensity score in control group
     	# n_t-by-n_c array with  element (i, j) = distance between 'i'th treated and 'j'th control units
-    	Distances.pairwise!(distance_matrix, Euclidean(), phat_t[: ,: ]', phat_c[:, :]')
+    	Distances.pairwise!(distance_matrix, SqEuclidean(), phat_t[: ,: ]', phat_c[:, :]', dims=2)
     end
     
     # estimate a control outcome, Y(0), for each treated unit with matching
