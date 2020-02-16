@@ -3,3 +3,10 @@ DataFrames
 StatsBase
 Distances
 IterTools
+# for testing:
+Test
+Random
+Distributions
+Distributed
+SharedArrays
+CSV
