@@ -12,7 +12,7 @@ Tests for matching.jl
 	# subsampling
 	n_subsample = 25_000
 	subsample_idx = rand(1:60_000, n_subsample)
-	datapath = normpath(joinpath(dirname(pathof(TreatmentEffects)), "..", "test\\data\\matching"))
+	datapath = normpath(joinpath(dirname(pathof(TreatmentEffects)), "..", "test/data/matching"))
 	y_raw = Array(CSV.read(joinpath(datapath, "y.csv"), header=false)[:1])[subsample_idx]
 	d_raw = Array(CSV.read(joinpath(datapath, "d.csv"), header=false)[:1])[subsample_idx]
 	x_raw = Array(convert(Matrix, CSV.read(joinpath(datapath, "X.csv"),
@@ -83,7 +83,7 @@ end
 	# subsampling
 	n_subsample = 25_000
 	subsample_idx = rand(1:60_000, n_subsample)
-	datapath = normpath(joinpath(dirname(pathof(TreatmentEffects)), "..", "test\\data\\matching"))
+	datapath = normpath(joinpath(dirname(pathof(TreatmentEffects)), "..", "test/data/matching"))
 	y_raw = Array(CSV.read(joinpath(datapath, "y.csv"), header=false)[:1])[subsample_idx]
 	d_raw = Array(CSV.read(joinpath(datapath, "d.csv"), header=false)[:1])[subsample_idx]
 	x_raw = Array(convert(Matrix, CSV.read(joinpath(datapath, "X.csv"),
@@ -167,7 +167,7 @@ end
 	# subsampling
 	n_subsample = 25_000
 	subsample_idx = rand(1:60_000, n_subsample)
-	datapath = normpath(joinpath(dirname(pathof(TreatmentEffects)), "..", "test\\data\\matching"))
+	datapath = normpath(joinpath(dirname(pathof(TreatmentEffects)), "..", "test/data/matching"))
 	y_raw = Array(CSV.read(joinpath(datapath, "y.csv"), header=false)[:1])[subsample_idx]
 	d_raw = Array(CSV.read(joinpath(datapath, "d.csv"), header=false)[:1])[subsample_idx]
 	x_raw = Array(convert(Matrix, CSV.read(joinpath(datapath, "X.csv"),
