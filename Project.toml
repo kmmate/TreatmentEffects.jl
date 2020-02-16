@@ -1,4 +1,5 @@
 name = "TreatmentEffects"
+uuid = "0d84208a-d7b0-5f8c-98a5-9618bd8138fa"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
@@ -11,4 +12,9 @@ IterTools = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 SharedArrays = "1a1011a3-84de-559e-8e89-a11a2f7dc383"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+
+[extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
