@@ -15,10 +15,10 @@ Only the models at terminal branches can be instantiated; higher level branches
 indicate abstract types.
 
 * If **SUTVA** (Stable Unit Treatment Value Assumption) holds: [`SUTVAModel`](@ref)
-	
+
 	SUTVA means that the potential outcome of unit ``i`` only depends on unit ``i``'s treatment.
 	Formally, ``Y_i(D_i, D_j) = Y_i(D_i) \forall i,j:j\neq i``.
-	
+
 	* If **Observational data**: [`ObservationalModel`](@ref)
 
 		By observational data we mean that the data do not come from a randomised control trial.
@@ -33,7 +33,7 @@ indicate abstract types.
 
 			!!! warning
 
-			This model type serves illustrative purposes. 
+			This model type serves illustrative purposes.
 			Use with real data is not recommended as the required assumption is extremely strong.
 
 		* If **CIA** (conditional independence, i.e. unconfundedness) holds: [`CIAModel`](@ref)
@@ -47,7 +47,7 @@ indicate abstract types.
 				``x_i`` exceeds/is below a certain cut-off value. This gives rise to the
 				Regression Discontinuity Design.
 
-				Implemented methods: 
+				Implemented methods:
 
 			* Else **no known cut-off based treatment participation rule** : [`MatchingModel`](@ref)
 
@@ -63,9 +63,9 @@ indicate abstract types.
 		The uncertainty in this case stems from the treatment assignment and/or sampling.
 
 		* If **all units perfectly comply with their assignment**: [`PerfectComplianceModel`](@ref)
-		
+
 		* Else **some units do not comply with their treatment assignment**: [`ImperfectComplianceModel`](@ref)
-			
+
 			* If **non-compliance with assignment is exogenous**: [`ExogenousNoncomplianceModel`](@ref)
 
 			!!! warning
@@ -78,6 +78,8 @@ indicate abstract types.
 
 * Else **SUTVA violated**: `InterferenceModel`
 
-	Rubin Causal models where SUTVA is violated have just been gaining ground recently.
-	Here the experimental data based instrumental variable estimator is implemented
-	for paired interference, based on Kormos and Lieli(2019). 
+	Rubin Causal models where SUTVA is violated have just been gaining ground relatively recently.
+	Here the experimental data based instrumental variable estimator is implemented	for paired interference, based on Kormos and Lieli,
+	"Treatment Effect Analysis for Pairs with	Endogenous Treatment Take-up" (forthcoming).
+
+	* If **Kormos and Lieli conditions hold**: `PairedInterferenceModel`

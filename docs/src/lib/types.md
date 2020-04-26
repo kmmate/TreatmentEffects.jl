@@ -18,4 +18,5 @@ CIAModel
 MatchingModel
 RDDModel
 InterferenceModel
+PairedInterferenceModel
 ```

@@ -24,7 +24,10 @@ export
 	predict_propscore,
 	# rdd
 	RDDModel,
-	rdd_sharpestimator
+	rdd_sharpestimator,
+	# Paired Interference
+	PairedInterferenceModel,
+	late_estimator
 
 
 include("data_cleaning.jl")
@@ -35,4 +38,5 @@ include("nonparametrics/np_regression.jl")
 include("exogenous_participation.jl")
 include("matching.jl")
 include("rdd.jl")
+include("paired_interference.jl")
 end

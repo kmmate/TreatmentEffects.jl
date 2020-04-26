@@ -17,6 +17,15 @@ ate_matchingestimator
 att_matchingestimator
 ate_blockingestimator
 ```
+## RDDModel
+```@docs
+rdd_sharpestimator
+```
+
+## PairedInterferenceModel
+```@docs
+late_estimator
+```
 
 ## Nonparametric regression
 ```@docs

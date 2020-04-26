@@ -18,10 +18,10 @@ abstract type CrossSectionModel end
 """
 Stable Unit Treatment Value Assumption (SUTVA) holds.
 """
-abstract type SUTVAModel <: CrossSectionModel end  
+abstract type SUTVAModel <: CrossSectionModel end
 
 """
-Stable Unit Treatment Value Assumption (SUTVA) is violated. Only available for paired interference.
+Stable Unit Treatment Value Assumption (SUTVA) is violated.
 """
 abstract type InterferenceModel <: CrossSectionModel end
 
@@ -44,8 +44,8 @@ Units perfectly comply with their treatment assignment, i.e. treatment takeup eq
 That is ``D(1) = 1`` iff ``Z = 1`` and ``D(0) = 0`` iff ``Z = 0``.
 
 ##### Fields
-- `y` : Observed outcome of interest
-- `z` : Treatment assignment
+- `y`::Array{<:Real, 1} : Observed outcome of interest
+- `z`::Array{<:Real, 1} : Treatment assignment
 
 ##### Examples
 ```julia
@@ -69,10 +69,10 @@ mutable struct PerfectComplianceModel <: RCTModel
 end
 
 """
-Units do not comply perfectly with their treatment assignment,  
+Units do not comply perfectly with their treatment assignment,
 i.e. treatment takeup not always equal to treatment assignment.
 That is ``P(D(1) = 1) != 1``.
-"""  
+"""
 abstract type ImperfectComplianceModel <: RCTModel end
 
 
@@ -96,7 +96,7 @@ exnm = ExogenousNoncomplianceModel(y, d)
 mutable struct ExogenousNoncomplianceModel <: ImperfectComplianceModel
 	y::Array{<:Real, 1}
 	d::Array{<:Real, 1}
-	function ExogenousNoncomplianceModel(y::Array{<:Real, 1}, d::Array{<:Real, 1}) 
+	function ExogenousNoncomplianceModel(y::Array{<:Real, 1}, d::Array{<:Real, 1})
 		if length(y) == length(d)
 			return new(y, d)
 		else
@@ -121,7 +121,7 @@ z = data[:treatment_assignment]
 d = data[:treatment_takeup]
 encm = EndogenousNoncomplianceModel(y, z, d)
 ```
-"""  
+"""
 mutable struct EndogenousNoncomplianceModel <: ImperfectComplianceModel
 	y::Array{<:Real, 1}
 	z::Array{<:Real, 1}
@@ -130,23 +130,23 @@ mutable struct EndogenousNoncomplianceModel <: ImperfectComplianceModel
 		if length(y) == length(z) == length(d)
 			return new(y, z, d)
 		else
-			error("`y`, `z`, `d` must have the same number of observations") 
+			error("`y`, `z`, `d` must have the same number of observations")
 		end
 	end
-end  
+end
 
 
 #		ObservationalModel subtypes
 """
 Potential outcomes independent of participation, that is ``[Y(0), Y(1)]`` is independent of ``D``.
 
-It is assumed that the only source of uncertainty is sampling. 
+It is assumed that the only source of uncertainty is sampling.
 That is, the observed dataset ``{(y_i, d_i)} i=1,...,n`` is and independent sample
 from a population, and the experimenter has no control over treatment participation, ``D``.
 
 ##### Fields
-- `y` : Observed outcome of interest
-- `d` : Treatment participation
+- `y`::Array{<:Real, 1} : Observed outcome of interest
+- `d`::Array{<:Real, 1} : Treatment participation
 
 ##### Examples
 ```julia
@@ -164,7 +164,7 @@ mutable struct ExogenousParticipationModel <: ObservationalModel
 	function ExogenousParticipationModel(y::Array{<:Real, 1}, d::Array{<:Real, 1})
 		if length(y) == length(d) && ndims(y) == ndims(d) == 1
 			return new(y, d)
-		else 
+		else
 			error("`y` and `d` must be one dimensional and have the same number of observations")
 		end
 	end
@@ -173,35 +173,33 @@ end
 
 #			CIAModel
 """
-Represent Conditional Independence Model.  
+Represent Conditional Independence Model.
 
-Given a set of covariate(s), potential outcomes are independent of participation, 
+Given a set of covariate(s), potential outcomes are independent of participation,
 that is given ``x``, ``[Y(0), Y(1)]`` is independent of ``D``.
 
-It is assumed that the only source of uncertainty is sampling. 
+It is assumed that the only source of uncertainty is sampling.
 That is, the observed dataset ``{(y_i, d_i, x_i)} i=1,...,n`` is an independent sample
 from a population.
 """
-abstract type CIAModel <: ObservationalModel end  
+abstract type CIAModel <: ObservationalModel end
 
 #				MatchingModel
 """
 Represent a Matching Model.
 
 A Matching Model is the most general subtype of the Conditional Independence Model where
-given a set of covariates, potential outcomes are independent of participation, 
+given a set of covariates, potential outcomes are independent of participation,
 that is given ``x``, ``[Y(0), Y(1)]`` is independent of ``D``.
 
-It is assumed that the only source of uncertainty is sampling. 
+It is assumed that the only source of uncertainty is sampling.
 That is, the observed dataset ``{(y_i, d_i, x_i)} i=1,...,n`` is an independent sample
 from a population, and the experimenter has no control over treatment participation, ``D``.
 
 ##### Fields
 - `y`::Array{<:Real, 1} : Observed outcome of interest
 - `d`::Array{<:Real, 1} : Treatment participation
-- `x`::Array{<:Real} : Covariates, either ``n``-long Array{<:Real, 1} or 
-	``n``-by-``K`` Array{<:Real} where ``n`` is the number of observations and
-	``K`` is the number of covariates
+- `x`::Array{<:Real} : Covariates, either ``n``-long Array{<:Real, 1} or ``n``-by-``K`` Array{<:Real} where ``n`` is the number of observations and ``K`` is the number of covariates
 
 ##### Examples
 ```julia
@@ -219,10 +217,10 @@ mutable struct MatchingModel <: CIAModel
 	function MatchingModel(y::Array{<:Real, 1}, d::Array{<:Real, 1}, x::Array{<:Real})
 		# dimension check for multiple covariates
 		if size(y)[1] == size(d)[1] == size(x)[1]
-			return new(y, d, x)			
+			return new(y, d, x)
 		else
-			error("`y`, `d`, `x` must have the same number of observations") 
-		end	
+			error("`y`, `d`, `x` must have the same number of observations")
+		end
 	end
 end
 
@@ -236,10 +234,10 @@ of participation, that is given ``x``, ``[Y(0), Y(1)]`` is
 independent of ``D``. This follows from the participation rule: either (i)
 ``D_i = 1`` if and only if ``x_i >= c`` for the `cutoff` value, ``c``,
 and ``D_i = 0 `` otherwise; or (ii) ``D_i = 1`` if and only if ``x_i <= c``
-for the `cutoff` value, ``c``, and ``D_i = 0 `` otherwise
+for the `cutoff` value, ``c``, and ``D_i = 0 `` otherwise.
 
 
-It is assumed that the only source of uncertainty is sampling. 
+It is assumed that the only source of uncertainty is sampling.
 That is, the observed dataset ``{(y_i, d_i, x_i)} i=1,...,n`` is an independent sample
 from a population.
 
@@ -267,9 +265,61 @@ mutable struct RDDModel <: CIAModel
 	cutoff::Float64
 	function RDDModel(y::Array{<:Real, 1}, d::Array{<:Real, 1}, x::Array{<:Real, 1}, cutoff::Float64)
 		if size(y)[1] == size(d)[1] == size(x)[1]
-			return new(y, d, x, cutoff)			
+			return new(y, d, x, cutoff)
 		else
-			error("`y`, `d`, `x` must have the same number of observations") 
+			error("`y`, `d`, `x` must have the same number of observations")
+		end
+	end
+end
+
+#	InterferenceModel subtypes
+"""
+	Represent a Paired Interference model.
+
+The population consists of pairs with distinguishable members, member-A and
+member-B. Treatment assignments ``Z_A`` and ``Z_B`` are both exogenous.
+Treatment participations ``[D_A(Z_A, Z_B), D_B(Z_A, Z_B)]`` may be endogenous.
+There are four potential outcomes: ``Y(D_A=d₁, D_B=d₂)``
+for ``(d₁, d₂)=(0,0),(0,1),(1,0),(1,1)``.
+
+See Kormos and Lieli.
+
+##### Fields
+- `y`::Array{<:Real, 1} : Observed outcome of interest
+- `d_a`::Array{<:Real, 1} : Treatment participation for member-A
+- `d_b`::Array{<:Real, 1} : Treatment participation for member-B
+- `z_a`::Array{<:Real, 1} : Treatment assignment for member-A
+- `z_b`::Array{<:Real, 1} : Treatment assignment for member-B
+
+
+##### References
+Kormos and Lieli, "Treatment Effect Analysis for Pairs with
+Endogenous Treatment Take-up" (forthcoming)
+
+##### Examples
+```julia
+using TreatmentEffects, CSV
+data = read_csv("pim_data.csv")
+y = data[:outcome]
+d_a = data[:treatment_takeup_a]  # d_a_i=1 iff i'th member-A is treated
+d_b = data[:treatment_takeup_b]  # d_b_i=1 iff i'th member-B is treated
+z_a = data[:treatment_assignment_a]  # z_a_i=1 iff i'th member-A is assigned to treated
+z_b = data[:treatment_assignment_b]  # z_b_i=1 iff i'th member-B is assigned to treated
+pim = RDDModel(y, d_a, d_b, z_a, z_b)
+```
+"""
+mutable struct PairedInterferenceModel <: InterferenceModel
+	y::Array{<:Real, 1}
+	d_a::Array{<:Real, 1}
+	d_b::Array{<:Real ,1}
+	z_a::Array{<:Real, 1}
+	z_b::Array{<:Real ,1}
+	function PairedInterferenceModel(y::Array{<:Real, 1}, d_a::Array{<:Real, 1},
+		d_b::Array{<:Real ,1}, z_a::Array{<:Real, 1}, z_b::Array{<:Real ,1})
+		if size(y)[1] == size(d_a)[1] == size(d_b)[1] == size(z_a)[1] == size(z_b)[1]
+			return new(y, d_a, d_b, z_a, z_b)
+		else
+			error("`y`, `d_a`, `d_b`, `z_a`, `z_b` must have the same number of observations")
 		end
 	end
 end
