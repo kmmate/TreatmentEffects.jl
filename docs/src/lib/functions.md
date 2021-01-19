@@ -25,6 +25,7 @@ rdd_sharpestimator
 ## PairedInterferenceModel
 ```@docs
 late_estimator
+bootstrap_distribution
 ```
 
 ## Nonparametric regression

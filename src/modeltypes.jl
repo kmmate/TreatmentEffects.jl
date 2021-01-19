@@ -305,7 +305,7 @@ d_a = data[:treatment_takeup_a]  # d_a_i=1 iff i'th member-A is treated
 d_b = data[:treatment_takeup_b]  # d_b_i=1 iff i'th member-B is treated
 z_a = data[:treatment_assignment_a]  # z_a_i=1 iff i'th member-A is assigned to treated
 z_b = data[:treatment_assignment_b]  # z_b_i=1 iff i'th member-B is assigned to treated
-pim = RDDModel(y, d_a, d_b, z_a, z_b)
+pim = PairedInterferenceModel(y, d_a, d_b, z_a, z_b)
 ```
 """
 mutable struct PairedInterferenceModel <: InterferenceModel

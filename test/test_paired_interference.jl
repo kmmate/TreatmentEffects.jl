@@ -173,3 +173,83 @@ end
     # ---- compare
     @test all(isapprox.(θ[1:3], latehats_sum[1:3]/mc_reps, atol=1e-1))
 end
+
+@testset "bootstrap_distribution" begin
+    # ---- DGP parameters
+    n = 10000  # number of pairs in sample
+    # -- 𝓓
+    p = Dict{String, Float64}()  #p.m.f values for [D_A(10), D_A(11), D_B(01), D_B(11)]
+    # unnormalised values
+    p["0000"] = 1
+    p["1000"] = 0  # by Monotonicity
+    p["0100"] = 1
+    p["0010"] = 0  # by Monotonicity
+    p["0001"] = 1
+    p["1100"] = 3
+    p["0110"] = 0  # by Monotonicity
+    p["0011"] = 4
+    p["1001"] = 0  # by Monotonicity
+    p["0101"] = 2
+    p["1010"] = 0  # by Monotonicity
+    p["0111"] = 2
+    p["1011"] = 0  # by Monotonicity
+    p["1101"] = 2
+    p["1110"] = 0  # by Monotonicity
+    p["1111"] = 1  # > 0 required
+    # normalise p
+    mass = sum(values(p))
+    for (key, value) in p; p[key] = p[key] / mass; end
+
+    # -- 𝓨
+    # distribution of [Y(00), Y(10), Y(01), Y(11)] | [D_A(10), D_A(11), D_B(01), D_B(11)]
+    # conditional mean vector
+    function μy(a10::T, a11::T, b01::T, b11::T) where {T<:Real}
+        mean_table = Dict{String, Array{<:Real, 1}}()
+        mean_table["0000"] = [0, 0, 0, 0]
+        mean_table["0100"] = [0, 2.0, 0, 0]
+        mean_table["0001"] = [0, 0, 2.0, 0]
+        mean_table["1100"] = [0, 2.0, 0, 5.0]
+        mean_table["0011"] = [0, 0, 2.0, 5.0]
+        mean_table["0101"] = [0, 3.0, 0, 6.7]
+        mean_table["0111"] = [0, 0, 3.1, 4.3]
+        mean_table["1101"] = [0, 0.4, 0, 2.0]
+        mean_table["1111"] = [0, 9.0, 9.0, 9.0]
+        return mean_table[join(i for i in (a10, a11, b01, b11))]
+    end
+    # covar matrix
+    m = randn(4,4)
+    Σ = m' * m
+    # ---- bootstrap
+    # -- generate data
+    # treatment assignments
+    z_a = [rand() <= 0.5 for _ in 1:n]
+    z_b = [rand() <= 0.5 for _ in 1:n]
+    # potential treatment participations
+    (d_a00, d_a10, d_a01, d_a11, d_b00, d_b10, d_b01, d_b11) = _gen_d(p, n)
+    # observed treatment participations
+    d_a = @. z_a*z_b*d_a11 + z_a*(1-z_b)*d_a10 + (1-z_a)*z_b*d_a01 + (1-z_a)*(1-z_b)*d_a00
+    d_b = @. z_a*z_b*d_b11 + z_a*(1-z_b)*d_b10 + (1-z_a)*z_b*d_b01 + (1-z_a)*(1-z_b)*d_b00
+    # potential outcomes
+    y_sample = zeros(n, 4)
+    for i in 1:n
+        μ = μy(d_a10[i], d_a11[i], d_b01[i], d_b11[i])
+        y_sample[i,:] .= rand(MvNormal(μ, Σ))
+    end
+    y00 = y_sample[:, 1]
+    y10 = y_sample[:, 2]
+    y01 = y_sample[:, 3]
+    y11 = y_sample[:, 4]
+    # observed outcome
+    y = @. d_a*d_b*y11 + d_a*(1-d_b)*y10 + (1-d_a)*d_b*y01 + (1-d_a)*(1-d_b)*y00
+    # -- bootstrap distribution
+    pim = PairedInterferenceModel(y, d_a, d_b, z_a, z_b)
+    bs_reps = 999
+    bs_dist = bootstrap_distribution(pim, bs_reps=bs_reps)
+    # ---- compute population expected values
+    θ = _compute_θ(μy, p)
+    # ---- compare with bootstrap mean
+    bs_dist_meanθ = sum(bs_dist, dims=2) / bs_reps
+    println(θ)
+    println(bs_dist_meanθ)
+    @test all(isapprox.(θ[1:3], bs_dist_meanθ[1:3], atol=1e-1))
+end

@@ -27,7 +27,8 @@ export
 	rdd_sharpestimator,
 	# Paired Interference
 	PairedInterferenceModel,
-	late_estimator
+	late_estimator,
+	bootstrap_distribution
 
 
 include("data_cleaning.jl")
